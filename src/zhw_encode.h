@@ -134,7 +134,6 @@ SC_MODULE(find_emax)
 			sensitive << emax << emax_v << c_sync;
 		SC_METHOD(ms_proc);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -234,7 +233,6 @@ SC_MODULE(fwd_cast)
 			sensitive << count << c_sync << c_int;
 		SC_METHOD(ms_proc);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -346,7 +344,6 @@ SC_MODULE(fwd_lift)
 			sensitive << v;
 		SC_METHOD(ms_proc)
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -446,7 +443,6 @@ struct encode_block<FP, 1> : sc_module
 			sensitive << m_ready;
 		SC_METHOD(ms_fwd_order);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -565,7 +561,6 @@ struct encode_block<FP, 2> : sc_module
 			sensitive << m_ready;
 		SC_METHOD(ms_fwd_order);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -778,7 +773,6 @@ struct encode_block<FP, 3> : sc_module
 			sensitive << m_ready;
 		SC_METHOD(ms_fwd_order);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -1024,7 +1018,6 @@ SC_MODULE(encode_ints)
 			sensitive << k0 << flush1 << m_ready << s_valid << s_flush;
 		SC_METHOD(ms_proc);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
@@ -1307,7 +1300,6 @@ SC_MODULE(encode_stream)
 			sensitive << cs;
 		SC_METHOD(ms_proc);
 			sensitive << clk.pos();
-			reset_signal_is(reset, RLEVEL);
 			dont_initialize();
 	}
 
