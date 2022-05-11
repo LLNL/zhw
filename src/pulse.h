@@ -3,6 +3,11 @@
 
 #include "systemc.h"
 
+namespace zhw {
+  extern sc_trace_file *tf;
+}
+
+
 // Process Prefix
 // --------------
 // mc: method combinatorial logic
@@ -67,7 +72,7 @@ SC_MODULE(pulse) // Produce a Pulse
 #if defined(VCD)
 	void start_of_simulation()
 	{
-		extern sc_trace_file *tf;
+    using zhw::tf;
 		sc_trace(tf, sig,   (std::string(name())+".sig").c_str());
 		sc_trace(tf, st,    (std::string(name())+".st").c_str());
 		sc_trace(tf, count, (std::string(name())+".count").c_str());

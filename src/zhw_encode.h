@@ -356,11 +356,19 @@ template<typename FP, int DIM>
 struct encode_block;
 
 // vector with a size of 4.
-template <class T>
-class sc_vector4 : public sc_vector<T> {
-	public:
-		sc_vector4() : sc_vector<T>(4) {}
-		explicit sc_vector4(const char* name_) : sc_vector<T>(name_, 4) {}
+/* template <class T> */
+/* class sc_vector4 : public sc_vector<T> { */
+/* 	public: */
+/* 		sc_vector4() : sc_vector<T>(4) {} */
+/* 		explicit sc_vector4(const char* name_) : sc_vector<T>(name_, 4) {} */
+/* }; */
+
+template<typename T>
+struct vector4_t {
+public:
+  T vector4[4];
+  
+  vector4_t(){};
 };
 
 template<typename FP>
@@ -478,8 +486,10 @@ struct encode_block<FP, 2> : sc_module
 	sc_signal<bool> c_yt_ready[4];
 
 	/*-------- modules --------*/
-	sc_vector4<fwd_lift<FP> > u_xt;
-	sc_vector4<fwd_lift<FP> > u_yt;
+	// sc_vector4<fwd_lift<FP> > u_xt;
+	// sc_vector4<fwd_lift<FP> > u_yt;
+	fwd_lift<FP> u_xt[4];
+	fwd_lift<FP> u_yt[4];
 
 	void mc_proc()
 	{
@@ -530,8 +540,10 @@ struct encode_block<FP, 2> : sc_module
 #endif
 
 	SC_CTOR(encode_block) :
-		u_xt("u_xt"),
-		u_yt("u_yt")
+	  // u_xt("u_xt"),
+	  // y_xt("u_yt")
+	  u_xt{{"u_xt_0"}, {"u_xt_1"}, {"u_xt_2"}, {"u_xt_3"}},
+	  u_yt{{"u_yt_0"}, {"u_yt_1"}, {"u_yt_2"}, {"u_yt_3"}}
 	{
 		for (int j = 0; j < 4; j++) {
 			u_xt[j].clk(clk);
@@ -600,9 +612,12 @@ struct encode_block<FP, 3> : sc_module
 	sc_signal<bool> c_zt_ready[4][4];
 
 	/*-------- modules --------*/
-	sc_vector4<sc_vector4<fwd_lift<FP> > > u_xt;
-	sc_vector4<sc_vector4<fwd_lift<FP> > > u_yt;
-	sc_vector4<sc_vector4<fwd_lift<FP> > > u_zt;
+	// sc_vector4<sc_vector4<fwd_lift<FP> > > u_xt;
+	// sc_vector4<sc_vector4<fwd_lift<FP> > > u_yt;
+	// sc_vector4<sc_vector4<fwd_lift<FP> > > u_zt;
+	fwd_lift<FP>  u_xt[4][4];
+	fwd_lift<FP>  u_yt[4][4];
+	fwd_lift<FP>  u_zt[4][4];
 
 	void mc_proc()
 	{
@@ -729,9 +744,27 @@ struct encode_block<FP, 3> : sc_module
 #endif
 
 	SC_CTOR(encode_block) :
-		u_xt("u_xt"),
-		u_yt("u_yt"),
-		u_zt("u_zt")
+	  // u_xt("u_xt"),
+	  // u_yt("u_yt"),
+	  // u_zt("u_zt")
+	  u_xt{
+	  	{{"u_xt_0_0"}, {"u_xt_0_1"}, {"u_xt_0_2"}, {"u_xt_0_3"}}, 
+	  		{{"u_xt_1_0"}, {"u_xt_1_1"}, {"u_xt_1_2"}, {"u_xt_1_3"}}, 
+	  		{{"u_xt_2_0"}, {"u_xt_2_1"}, {"u_xt_2_2"}, {"u_xt_2_3"}}, 
+	  		{{"u_xt_3_0"}, {"u_xt_3_1"}, {"u_xt_3_2"}, {"u_xt_3_3"}}
+	  },
+	  u_yt{
+	  	{{"u_yt_0_0"}, {"u_yt_0_1"}, {"u_yt_0_2"}, {"u_yt_0_3"}}, 
+	  	{{"u_yt_1_0"}, {"u_yt_1_1"}, {"u_yt_1_2"}, {"u_yt_1_3"}}, 
+	  	{{"u_yt_2_0"}, {"u_yt_2_1"}, {"u_yt_2_2"}, {"u_yt_2_3"}}, 
+	  	{{"u_yt_3_0"}, {"u_yt_3_1"}, {"u_yt_3_2"}, {"u_yt_3_3"}}
+	  },
+	  u_zt{
+	  	{{"u_zt_0_0"}, {"u_zt_0_1"}, {"u_zt_0_2"}, {"u_zt_0_3"}}, 
+	  	{{"u_zt_1_0"}, {"u_zt_1_1"}, {"u_zt_1_2"}, {"u_zt_1_3"}}, 
+	  	{{"u_zt_2_0"}, {"u_zt_2_1"}, {"u_zt_2_2"}, {"u_zt_2_3"}}, 
+	  	{{"u_zt_3_0"}, {"u_zt_3_1"}, {"u_zt_3_2"}, {"u_zt_3_3"}}
+	  }
 	{
 		for (int k = 0; k < 4; k++) {
 			for (int j = 0; j < 4; j++) {
@@ -781,21 +814,25 @@ struct encode_block<FP, 3> : sc_module
 //-----------------------------------------------------------------------------
 // block buffer
 //-----------------------------------------------------------------------------
-template<typename FP, int DIM>
+//template<typename FP, int DIM>
+template<typename FP, int DIM, typename IO>
 SC_MODULE(block_buffer)
 {
-	typedef typename FP::ui_t ui_t;
+//	typedef typename FP::ui_t ui_t;
 	typedef sc_bv<FP::bits*fpblk_sz(DIM)> block_t;
 
 	sc_in<bool> clk;
 	sc_in<bool> reset;
 
 	/*-------- ports --------*/
-	sc_in <ui_t> s_block[fpblk_sz(DIM)];
+//	sc_in <ui_t> s_block[fpblk_sz(DIM)];
+	sc_in <IO> s_block[fpblk_sz(DIM)];
+
 	sc_in <bool> s_valid;
 	sc_out<bool> s_ready;
 
-	sc_out<ui_t> m_block[fpblk_sz(DIM)];
+//	sc_out<ui_t> m_block[fpblk_sz(DIM)];
+	sc_out<IO> m_block[fpblk_sz(DIM)];
 	sc_out<bool> m_valid;
 	sc_in <bool> m_ready;
 
@@ -909,6 +946,7 @@ SC_MODULE(encode_ints)
 
 		// rewire block as bit planes
 		sc_bv<fpblk_sz(DIM)> tmp;
+
 		for (int j = 0; j < planes; j++) {
 			for (int i = 0; i < fpblk_sz(DIM); i++) {
 				tmp[i] = s_block[i].read()[j].to_bool();
@@ -920,9 +958,10 @@ SC_MODULE(encode_ints)
 			(last && m_ready.read()) || // last and ready
 			!s_valid.read() // prime
 		);
+
 	}
 
-	void ms_proc()
+	void ms_proc()//runs for each plane. TODO run for each block element instead?
 	{
 		if (reset == RLEVEL) {
 			k0 = 0;
@@ -931,6 +970,7 @@ SC_MODULE(encode_ints)
 			bp1 = 0; m_bp = 0;
 			last1 = false; m_last = false;
 			valid1 = false; m_valid = false;
+		
 		} else {
 			if (m_ready.read()) {
 				bool last =
@@ -939,12 +979,18 @@ SC_MODULE(encode_ints)
 
 				// Stage 1 - find most significant bit (bc1-1)
 				unsigned b = 0;
+				bool frst = 1;
 				for (unsigned i = fpblk_sz(DIM); i > 0; i--) {
-					if (c_bplane[k0.read()].read()[i-1]) {b = i; break;}
+					if (c_bplane[k0.read()].read()[i-1]) {
+					  if (frst) {
+					    frst=0;
+					    b = i;
+					  }
+					}
 				}
 				n1.write(n0.read());
-				bc1.write(b);
-				bp1.write(c_bplane[k0.read()].read());
+				bc1.write(b);							//select first "1" bit from plane k0
+				bp1.write(c_bplane[k0.read()].read());	//sample plane k0 to process
 				last1.write(last);
 				valid1.write(s_valid.read());
 				flush1.write(s_flush.read());
@@ -954,23 +1000,132 @@ SC_MODULE(encode_ints)
 					else k0 = k0.read() + 1;
 				}
 
+
 				// Stage 2a - copy bits upto n1
 				sc_bv<bp_w(DIM)> tmp = 0;
-				unsigned j = n1.read();
-				for (unsigned i = 0; i < n1.read(); i++) {
-					tmp[i] = bp1.read()[i].to_bool();
+				/** The original code */
+				// unsigned j = n1.read();
+				// for (unsigned i = 0; i < n1.read(); i++) {
+				//	tmp[i] = bp1.read()[i].to_bool();
+				// }
+
+				// // Stage 2b - encode remaining bits >= n1
+				// unsigned n;
+				// for (n = n1.read(); n < bc1.read(); n++) {
+				//	tmp[j++] = true; // group bit
+				//	while (!bp1.read()[n].to_bool()) {n++; tmp[j++] = false;}
+				//	// conditional for implicit bit
+				//	if (n != fpblk_sz(DIM)-1) tmp[j++] = true;
+				// }
+				// // conditional for implicit zero
+				// if (n != fpblk_sz(DIM)) tmp[j++] = false;
+				/** The transformed code */
+				/**
+				 * 1. generate the encoded 2-bit for each bp1 bit
+				 * 2. in the meantime of 1e also record the correct values of start and end position of j (n1_shiftamt and first_after_bc)
+				 * 3. slice encoded bp1 and concatenate it with bp1 prefix, this is done with bitwise operations
+				 * 4. The final j is generated by arithmetic operations
+				 */
+				unsigned n;
+				unsigned shiftamt = 0; 
+				unsigned n1_shiftamt = 0;
+				unsigned first_after_bc = n1.read(); 
+				unsigned last_n = n1.read();
+
+				bool found = false;
+
+				/* step 1, 2 */
+				shiftamt = 0;
+				for(n = 0; n < fpblk_sz(DIM); n++) { 
+					if(n == n1.read()) {
+						n1_shiftamt = shiftamt;
+					}
+					if(n == 0) {
+						shiftamt += 2;
+						if(bp1.read()[0]) {
+							tmp[0] = 1;
+							tmp[1] = 1;
+						} else {
+							tmp[0] = 1;
+							tmp[1] = 0;
+						}
+					} else {
+						if(bp1.read()[n].to_bool() && bp1.read()[n - 1].to_bool()) { // a 1'b1 maps to 2'b11
+							tmp[shiftamt] = 1;
+							tmp[shiftamt + 1] = 1;
+							shiftamt = shiftamt + 2;
+						} else if(bp1.read()[n].to_bool() && !bp1.read()[n - 1].to_bool()) {
+							// Note: in this "1" followed by "0" pattern, 1 will be skipped in the main loop
+							if(n != fpblk_sz(DIM) - 1) {
+								tmp[shiftamt] = 1;
+								shiftamt = shiftamt + 1;
+							}
+						}else if(!bp1.read()[n].to_bool() && !bp1.read()[n-1].to_bool()) { // A 0 following a 0 maps to 1'b0
+							tmp[shiftamt] = 0;
+							shiftamt = shiftamt + 1;
+						} else if(!bp1.read()[n].to_bool() && bp1.read()[n-1].to_bool()) { // A 0 following a 1 maps to 2'b01
+							tmp[shiftamt] = 1;
+							tmp[shiftamt + 1] = 0;
+							shiftamt = shiftamt + 2;
+						}
+					}
+					// trying to locate last j modified
+					if(!found && bp1.read()[n].to_bool() && n >= bc1.read() - 1 && n1 < bc1.read()) {
+						found = true;
+						if(bp1.read()[n].to_bool() && !bp1.read()[n - 1].to_bool()) {
+							if(n != fpblk_sz(DIM) - 1)
+								first_after_bc = shiftamt;
+							else
+								first_after_bc = shiftamt - 1;
+						} else { // 10
+							if(n != fpblk_sz(DIM) - 1)
+								first_after_bc = shiftamt;
+							else
+								first_after_bc = shiftamt - 1;
+						}
+						last_n = n + 1; // the last n before the final n++
+					}
 				}
 
-				// Stage 2b - encode remaining bits >= n1
-				unsigned n;
-				for (n = n1.read(); n < bc1.read(); n++) {
-					tmp[j++] = true; // group bit
-					while (!bp1.read()[n].to_bool()) {n++; tmp[j++] = false;}
-					// conditional for implicit bit
-					if (n != fpblk_sz(DIM)-1) tmp[j++] = true;
+				/* step 3 */
+				sc_bv<bp_w(DIM)> shiftmask = -1;
+				if(first_after_bc < bp_w(DIM)) {
+					tmp = tmp & ~(shiftmask << (first_after_bc));
 				}
-				// conditional for implicit zero
-				if (n != fpblk_sz(DIM)) tmp[j++] = false;
+				unsigned delta = 0;
+				if(last_n != fpblk_sz(DIM)) tmp[first_after_bc] = 0;
+				if(n1.read() >= bc1.read()) {
+					tmp = 0;
+				} else {
+					if(n1.read() == 0) {
+						// nothing needs to change, the first bit is correct and we only take from tmp
+					} else {
+						if( (!bp1.read()[n1.read()] && !bp1.read()[n1.read() - 1]) || (bp1.read()[n1.read()] && !bp1.read()[n1.read() - 1])) {
+							tmp = (((tmp >> n1_shiftamt) << 1) | 1) << n1.read();
+							delta = 1;
+						} else {
+							tmp = tmp >> n1_shiftamt << n1.read();
+						}
+					}
+				}
+				sc_bv<bp_w(DIM)> shiftmask_2 = -1;
+				tmp = (tmp & (shiftmask_2 << n1.read())) | (bp1.read() & ~(shiftmask_2 << n1.read()));
+
+				/* step 4 */
+				unsigned j = 0;
+				if(n1.read() >= bc1.read()) {
+					// loop is not executed
+					j = n1.read();
+					if(n1.read() != fpblk_sz(DIM)) {
+						j = j + 1;
+					}
+				} else {
+					j = first_after_bc + delta - n1_shiftamt + n1.read();
+					if(last_n != fpblk_sz(DIM)) {
+						j = j + 1;
+					}
+				}
+				/** new code ends */
 
 				m_bc.write(j); // derived from n1, bc1 & bp1
 				m_bp.write(tmp); //
@@ -979,6 +1134,7 @@ SC_MODULE(encode_ints)
 			} else {
 				if (!s_flush.read()) flush1.write(false);
 			}
+
 		}
 	}
 
@@ -1172,7 +1328,7 @@ SC_MODULE(encode_stream)
 		m_bits.valid_w(false);
 		ts = cs; // get current state
 		switch (ts.s) {
-		case START:
+		case START: {
 			// read next max exponent, calculate precision
 			// (see zfp/src/template/codecf.c:precision)
 			ts.prec = sc_min(maxprec.read(),
@@ -1191,7 +1347,8 @@ SC_MODULE(encode_stream)
 				}
 			}
 			break;
-		case ZERO:
+		}
+		case ZERO: {
 			// encode '0' - does not check maxbits
 			ts.buf[0] = false;
 			ts.bits = 1;
@@ -1199,7 +1356,8 @@ SC_MODULE(encode_stream)
 			s_ex.ready_w(true);
 			ts.s = PAD; // next:
 			break;
-		case EXPO:
+		}
+		case EXPO: {
 			// encode '1' and exponent - does not check maxbits
 			// constraint - buffer width >= ebits+1
 			static_assert(buf_w >= FP::ebits+1, "Buffer width must be >= exponent width + 1");
@@ -1211,7 +1369,8 @@ SC_MODULE(encode_stream)
 			if (ts.planes < ts.prec) ts.s = PLANES; // next:
 			else ts.s = PAD; // next:
 			break;
-		case PLANES:
+		}
+		case PLANES: {
 			// pack bits from bit plane into output buffer
 			if (s_valid.read()) {
 				if (pack_bits(ts, s_bc.read(), s_bp.read())) {
@@ -1230,7 +1389,8 @@ SC_MODULE(encode_stream)
 				else ts.s = PAD; // next:
 			}
 			break;
-		case PAD:
+		}
+		case PAD: {
 			// discard remaining planes, look for last, do in parallel with pad
 			if (s_valid.read()) {
 				if (ts.planes < FP::bits) {
@@ -1253,6 +1413,7 @@ SC_MODULE(encode_stream)
 			// if discard, pad and flush done
 			if (dis_done && pad_done && fls_done) ts.s = START; // next:
 			break;
+		}
 		}
 		ns = ts;
 	}
@@ -1363,7 +1524,7 @@ SC_MODULE(encode)
 	ssplit<expo_t,1,4,RLEVEL> u_ssplit_ex;
 	fwd_cast<FP, DIM> u_fwd_cast;
 	encode_block<FP, DIM> u_encode_block;
-	block_buffer<FP, DIM> u_block_buffer;
+	block_buffer<FP, DIM,ui_t> u_block_buffer;
 	encode_ints<FP, DIM> u_encode_ints;
 	encode_stream<FP, DIM, B> u_encode_stream;
 
@@ -1463,3 +1624,4 @@ SC_MODULE(encode)
  * Why does hex uppercase not work when printing SystemC types?
  */
 #endif // ZHW_ENCODE_H
+

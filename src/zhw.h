@@ -40,7 +40,8 @@ constexpr int fpblk_sz(int dim) {return 1 << 2*dim;} // 4^dim;
 // #define fpblk_sz(dim) (1 << 2*dim)
 
 constexpr int bc_w(int dim) {return 2*dim+2;} // bit count width
-constexpr int bp_w(int dim) {return 2*fpblk_sz(dim)+1;} // bit plane width
+constexpr int bp_w(int dim) {return 2*fpblk_sz(dim)+1;} // bit plane width MB: bug bug, this is incorrect and should be "-1" not "+1"
+constexpr int bw_w(int dim) {return 2*fpblk_sz(dim);}// bit window (max encoded bit plane width) + 1
 
 template<class T>
 constexpr const T& max(const T& a, const T& b)
@@ -51,3 +52,4 @@ extern sc_trace_file *tf;
 } // namespace zhw
 
 #endif // ZHW_H
+
