@@ -6,11 +6,12 @@
 # $Log: $
 #
 
-PACKAGE = zhw-0.5.0
+PACKAGE = zhw-0.6.0
 
 .PHONY: all
 all:
-	cd test && $(MAKE) $@
+	cd test/decode_test && $(MAKE) $@
+	cd ../encode_test && $(MAKE) $@
 
 .PHONY: dist
 dist: distclean
@@ -19,4 +20,5 @@ dist: distclean
 .PHONY: distclean
 distclean:
 	$(RM) ../$(PACKAGE).tgz
-	cd test && $(MAKE) clean
+	cd test/decode_test && $(MAKE) clean
+	cd ../encode_test && $(MAKE) clean

@@ -1,5 +1,11 @@
+# build directory
+/build
+/test/decoder_test/decoder_test	#binary
+/test/encoder_test/encoder_test #binary
+
 # Object files
 *.o
+*.d
 *.ko
 *.obj
 *.elf

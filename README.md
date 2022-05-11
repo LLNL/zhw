@@ -3,17 +3,26 @@ ZFP is a floating-point compression format gaining traction in high-performance 
 
 The hardware implementation of ZFP is sourced in SystemC to facilitate its evaluation in various architectures. The encode pipeline consists of several modules. Uncompressed blocks of floating-point numbers in IEEE format flow into the pipeline in a stream and a compressed bitstream flows out from the pipeline. The decode pipeline is the inverse of the encode pipeline. A modular design enables number formats other than IEEE (such as posits) to be considered with minor adaptations. Best performance will be realized from the hardware ZFP unit when batches of blocks are processed at a time. The implementation supports 1-D, 2-D and 3-D blocks of floating-point numbers. C++ template parameters are used to specify the bit width of floating-point numbers and the array dimension of the encoder.
 
-A test bench program has been created with several test cases, some with continuous data that is ideal for ZFP, and others with extreme cases containing numbers near or at the maximum or minimum values supported by the number format. The software implementation of ZFP {2] has been used to validate the hardware implementation of ZFP.
+A test bench program has been created with several test cases, some with continuous data that is ideal for ZFP, and others with extreme cases containing numbers near or at the maximum or minimum values supported by the number format. The software implementation of ZFP [2](http://github.com/LLNL/zfp) has been used to validate the hardware implementation of ZFP.
 
 ### Getting Started
 - Install the SystemC library
 - Clone or copy the zhw repository to your system
+
+#### Building Using Make
 - Type "make help" from the top directory for available build and execution options
 
 Environment variables:
 
 - SCDIR:  SystemC source directory
 - ZFPDIR: ZFP (in software) source directory
+
+#### Building Using CMake
+- Create an out of source build directory and navigate to it (e.g. mkdir ../zhw_build && cd ../zhw_build)
+- Invoke cmake specifying the zhw project directory as a build target (e.g. cmake ../zhw)
+- Type "make" to build baseline encoder and decoder 2D test programs with .vcd output generation enabled
+
+SystemC will be autodetected provided it was integrated into your CMake cache during install (default behavior).
 
 ### References
 1. Peter Lindstrom, "Fixed-Rate Compressed Floating-Point Arrays," IEEE Transactions on Visualization and Computer Graphics, 20(12):2674-2683, December 2014. [doi:10.1109/TVCG.2014.2346458](http://doi.org/10.1109/TVCG.2014.2346458).
@@ -24,7 +33,7 @@ Environment variables:
 The open source SystemC library is needed for simulation of ZHW.
 [http://workspace.accellera.org/downloads/standards/systemc](http://workspace.accellera.org/downloads/standards/systemc)
 
-Install the software version of ZFP if validation of the hardware implementation is desired. Validation of ZHW output is enabled with a compile option to the test program.
+Install the software version of ZFP if validation of the hardware implementation is desired. Integrated software validation of ZHW is supported with zfp release 0.5.5 for the ZHW *encoder only*, and is enabled with a compile option to the encoder test program.
 [http://github.com/LLNL/zfp](http://github.com/LLNL/zfp)
 
 ### Contributing
