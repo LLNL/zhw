@@ -96,7 +96,7 @@ class decode_full_tb
 			cout << CYAN << "INFO: " <<YELLOW << "simple_stream() " << RESET << "test @ " << sc_time_stamp() << endl;
 
 			//output bitstream words as requested by the decoder.
-			while(i<(nblocks*2)+30) //each block is encoded over 2 ui_t's in tcaseunits.h (128 = minbits = maxbits, and, 1 ui_t = 64 bits)
+			while(i<(nblocks*test0.words_per_block)+30) //each block is encoded over 2 ui_t's in tcaseunits.h (128 = minbits = maxbits, and, 1 ui_t = 64 bits)
 			{
 				if(s_bits.ready_r())
 				{
@@ -206,7 +206,7 @@ class decode_full_tb
 			cout << CYAN << "INFO" << RESET << " will test " << CYAN << end_block-start_block << RESET << " consecutive block decodes from block: " << CYAN << start_block  << RESET " to " << CYAN << end_block << RESET << endl;
 			for(int h=start_block; h<blocks; h++)
 			{
-				cout << CYAN "INFO" << RESET<< " Validate 2D block " << dec << CYAN<< h << RESET << " decoding (13 plane test block) @: " << sc_time_stamp();
+				cout << CYAN "INFO" << RESET<< " Validate "<< DIM << "D block " << dec << CYAN<< h << RESET << " decoding (13 plane test block) @: " << sc_time_stamp();
 				while(!m_stream.valid_r())
 					wait();					//wait until data is clocked through.
 
@@ -268,7 +268,7 @@ class decode_full_tb
 			cout << CYAN << "INFO" << RESET << " will test " << CYAN << 15 << RESET << " consecutive zero block decodes from block: " << CYAN << 0  << RESET " to " << CYAN << 15 << RESET << endl;
 			for(int h=0; h<15; h++)
 			{
-				cout << CYAN "INFO" << RESET<< " Validate 2D block " << dec << CYAN<< h << RESET << " decoding (13 plane test block) @: " << sc_time_stamp();
+				cout << CYAN "INFO" << RESET<< " Validate "<< DIM << "D block " << dec << CYAN<< h << RESET << " decoding (13 plane test block) @: " << sc_time_stamp();
 				while(!m_stream.valid_r())
 					wait();					//wait until data is clocked through.
 

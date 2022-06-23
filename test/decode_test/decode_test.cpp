@@ -1,3 +1,5 @@
+#define DECODER_DIM 1 /*2*/		/*Which dimension of zhw decoder pipeline to test? todo: support 3D*/
+
 //the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"      /* Black */
@@ -43,18 +45,18 @@ int sc_main(int argc , char *argv[])
 
 #if defined(VCD)
 	using zhw::tf;
-	tf = sc_create_vcd_trace_file("FULL_DECODER");
+	tf = sc_create_vcd_trace_file(std::string("FULL_"+std::to_string(DECODER_DIM)+"D_DECODER").c_str());
 	tf->set_time_unit(1, SC_NS);
 	sc_trace(tf, clk, clk.name());
 	sc_trace(tf, reset, reset.name());
 #endif
 
 	cout << CYAN << "INFO: " << RESET "Test decode" << endl;
-	decode_full_tb<fpn_t,enc_t,2> decode_stream_tb(clk,reset,"DUT_decode_full");
+	decode_full_tb<fpn_t,enc_t,DECODER_DIM> decode_stream_tb(clk,reset,"DUT_decode_full");
 
 	cout << CYAN << "INFO" << RESET << ": Simulating " << endl;
 
-	sc_start(43700, SC_NS);
+	sc_start(55000, SC_NS);
 
 	cout << CYAN "INFO" << RESET << ": Simulation done " << endl;
 	return 0;

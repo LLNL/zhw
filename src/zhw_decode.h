@@ -179,7 +179,8 @@ struct decode_block<FP, 1> : sc_module
 
 	void mc_proc()
 	{
-		s_ready.write(m_ready.read()); // bypass u_xt and u_yt s_ready
+		s_ready.write(m_ready.read()); 	//bypass u_xt and u_yt s_ready
+		m_valid.write(c_xt_valid);		//forward xt transform valid out of decode_block.
 	}
 
 	void ms_rev_order()
@@ -187,7 +188,6 @@ struct decode_block<FP, 1> : sc_module
 		if (reset == RLEVEL)			//On reset, clear xor_control flow register
 		{
 			xors_valid.write(false);
-			m_valid.write(c_xt_valid);	//forward xt transform valid out of decode_block.
 		}
 		else							//normal flow
 		{
@@ -197,7 +197,7 @@ struct decode_block<FP, 1> : sc_module
 				c_xt_data[2].write((s_block[ 2].read() ^ NBMASK) - NBMASK);
 				c_xt_data[3].write((s_block[ 3].read() ^ NBMASK) - NBMASK);
 
-				xors_valid.write(s_valid.read());	//Tell permutation stages this data is good.
+				xors_valid.write(s_valid.read());
 			}
 		}
 	}
@@ -227,18 +227,17 @@ struct decode_block<FP, 1> : sc_module
 
 		u_xt.clk(clk);
 		u_xt.reset(reset);
-		u_xt.s_valid(xors_valid); //wait until xors are done before u_xt starts.
+		u_xt.s_valid(xors_valid); // wait until xors are done before u_xt starts.
 		u_xt.s_ready(c_xt_ready); // output not used
 		u_xt.m_valid(c_xt_valid);
 		u_xt.m_ready(m_ready);
-
 
 		//connect: permutation  ->lift  ->output
 		//where:   c_xt_data[]->u_xt->m_block
 		for (int i = 0; i < 4; i++)
 		{
-			u_xt.s_port[i](s_block[i]);	// in x
-			u_xt.m_port[i](c_xt_data[i]);
+			u_xt.s_port[i](c_xt_data[i]);
+			u_xt.m_port[i](m_block[i]);
 		}
 
 		SC_METHOD(mc_proc);
@@ -954,9 +953,7 @@ template<int DIM>
 inline void sc_trace(sc_trace_file*& f, const plane_reg<DIM>& val, std::string name){sc_trace(f,val.f, name + ".f");sc_trace(f, val.w, name + ".w");}
 
 //It is necessary to implement a different decode_stream depending on DIM and FP settings
-template<typename FP, typename B, int DIM> struct decode_stream;
-
-template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
+template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 {
 	typedef typename FP::expo_t expo_t;
 	typedef typename B::uic_t uic_t;
@@ -974,12 +971,12 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 
 	//IN PORTS
 	sc_stream_in <bool> s_blk_start;		//Indicates start of header at current bit offset.
-	sc_stream_in<sc_uint<bc_w(2)> > s_bc;	//number of bits read from previous flit.
+	sc_stream_in<sc_uint<bc_w(DIM)> > s_bc;	//number of bits read from previous flit.
 	sc_stream_in<B> s_bits; 				// inherit from encoder design assume B has tdata and tlast fields
 
 	// OUT PORTS
 	sc_stream_out<block_header<FP> > m_bhdr;	//exponent, biased + nought block flag.
-	sc_stream_out<sc_bv<bw_w(2)> > m_bp;		//a "flit" that encodes a bit plane.
+	sc_stream_out<sc_bv<bw_w(DIM)> > m_bp;		//a "flit" that encodes a bit plane.
 	sc_out <uconfig_t> m_block_maxprec;			//per-block maxprec (computed using minexp and block exponent)
 
 	// SUBMODULE PORTS
@@ -1096,9 +1093,9 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 	inline uconfig_t get_block_maxprec(expo_t maxexp) //see (zfp) src/template/codecf.c:6 "precision"
 	{
 #if (ZFP_ROUNDING_MODE != ZFP_ROUND_NEVER) && defined(ZFP_WITH_TIGHT_ERROR)
-		sconfig_t _MAX = ((sconfig_t)maxexp - s_minexp.read() + 2 * 2 + 1);
+		sconfig_t _MAX = ((sconfig_t)maxexp - s_minexp.read() + 2 * DIM + 1);
 #else
-		sconfig_t _MAX = (sconfig_t)((sconfig_t)maxexp - s_minexp.read() + 2 * 2 + 2);
+		sconfig_t _MAX = (sconfig_t)((sconfig_t)maxexp - s_minexp.read() + 2 * DIM + 2);
 #endif
 		if(_MAX < 0 )_MAX = 0;
 		if((uconfig_t)_MAX < s_maxprec.read())
@@ -1129,6 +1126,7 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 			//all sc_signals use default constructor, so b_c{:}=0 and x_wordoff=0.
 			minbits = s_maxbits.read() - s_minbits.read();
 			c_m_bfifo.ready_w(false);
+			c_rembits = 0;
 		} else {
 			plane_reg<2>b_wrk[4] ={b_c[0].read(),b_c[1].read(),b_c[2].read(),b_c[3].read()}; //get most up to date register file.
 			sc_uint<log2rz(fpblk_sz(2))+2>w_wordoff = c_wordoff.read();
@@ -1217,8 +1215,6 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 				m_bhdr.data_w(bhdr);
 				m_bhdr.valid_w(true);
 
-
-
 			}
 			else
 			{
@@ -1236,7 +1232,9 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 
 					)
 			{
-				w_rembits = c_rembits.read() - s_bc.data_r();
+				if(!_s_blk_cycle)										//if the start of the block, w_rembits was actually set already.
+					w_rembits = c_rembits.read() - s_bc.data_r();		//if not the start of the block, retrieve number of remaining bits.
+
 				//read in next bit count
 				if(!_s_blk_cycle)
 					w_wordoff+=s_bc.data_r();							//use last cycles feedback to offset to next bit plane window
@@ -1252,7 +1250,7 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 			}
 			else
 			{
-				if(m_bp.ready_r() || s_bc.valid_r())				//technically should be && but,
+				if(m_bp.ready_r() || s_bc.valid_r())
 				{
 					m_bp.valid_w(false); s_bc.ready_w(false);
 				}
@@ -1324,7 +1322,6 @@ template<typename FP, typename B> struct decode_stream<FP, B, 2>: sc_module
 	}
 
 };
-
 
 //-----------------------------------------------------------------------------
 // inverse block-floating-point transform from signed integers
