@@ -1084,7 +1084,10 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 		sc_uint<log2rz(fpblk_sz(2))+2>b1rshift = bitoff%bw_w(2);
 		sc_uint<log2rz(fpblk_sz(2))+2>b2lshift = bw_w(2) - b1rshift;
 
-		window = ((b1 >> b1rshift) | (b2 << b2lshift));
+		if(b1rshift!=0)
+			window = ((b1 >> b1rshift) | (b2 << b2lshift));
+		else
+			window = b1;
 
 		return window;
 	}
@@ -1140,7 +1143,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 			if(		(!csync.read() && (_s_blk_cycle || skpbts.read()))	//not stalled and a start block , or already skipping bits
 																		)
 			{
-				 w_rembits = c_rembits.read();
+				w_rembits = c_rembits.read();
 				//skip block padding bits if necessary
 				if(w_rembits>0)
 				{
@@ -1154,8 +1157,8 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 					}
 					else
 					{																		//flush extra bitstream window register if "remainder bits" end at a bitstream window register boundary.
-						dreg_bits = (w_rembits%bw_w(2));
-						get_window(b_wrk,dreg_bits+1);										//+1 will force get_window to flush boundary register
+						dreg_bits = w_rembits;
+						get_window(b_wrk,c_wordoff.read()+dreg_bits);
 					}
 
 					c_rembits.write((w_rembits-dreg_bits));									//update minimum remaining bits (to skip) for this block
@@ -1164,7 +1167,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 						skpbts.write(true);													//not finished skipping
 					else																	//finished skipping, fix up bitstream offset and enable header search.
 					{
-						c_wordoff.write((dreg_bits+1)%bw_w(2));								//modify the bitstream window register offset used by decoder to account for dreg bits
+						c_wordoff.write((c_wordoff.read()+dreg_bits)%bw_w(2));				//modify the bitstream window register offset used by decoder to account for dreg bits
 						skpbts.write(false);												//enable header search.
 					}
 
@@ -1180,41 +1183,53 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 					&& (m_bp.ready_r() && s_bc.valid_r())	//feedback loop is not stalled
 															)
 			{
-				w_rembits = s_maxbits.read();//Assume maxbits are available in the bitstream (well formed block).
-				w_wordoff+=s_bc.data_r();
-
-				bhdr.set_zb(!(get_window(b_wrk,w_wordoff)&1));
-				w_wordoff+=1;
-
-				w_wordoff = w_wordoff%bw_w(2);	//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
-				w_rembits -= 1;					//keep track of all read bits
-				if(!bhdr.zb)					//if no zero block, read an exponent.
+				if(c_rembits.read() == 0)	//if all bits were read in previous block, detect zfp header
 				{
-					expo_t blockexpt = get_window(b_wrk,w_wordoff);	//Extract the exponent from valid bitstream window
-					w_wordoff+=FP::ebits;
+					w_rembits = s_maxbits.read();//Assume maxbits are available in the bitstream (well formed block).
+					w_wordoff+=s_bc.data_r();
+
+					bhdr.set_zb(!(get_window(b_wrk,w_wordoff)&1));
+					w_wordoff+=1;
 
 					w_wordoff = w_wordoff%bw_w(2);	//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
-					w_rembits -= FP::ebits;			//keep track of all read bits
-					blockexpt -= FP::ebias;			//Assume encoded with bias, and remove this bias from exponent
+					w_rembits -= 1;					//keep track of all read bits
+					if(!bhdr.zb)					//if no zero block, read an exponent.
+					{
+						expo_t blockexpt = get_window(b_wrk,w_wordoff);	//Extract the exponent from valid bitstream window
+						w_wordoff+=FP::ebits;
 
-					m_block_maxprec.write(get_block_maxprec(blockexpt));	//Compute and output per-block maxprec.
-					bhdr.set_exp(blockexpt);
-					s_blk_start.ready_w(true);
+						w_wordoff = w_wordoff%bw_w(2);	//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
+						w_rembits -= FP::ebits;			//keep track of all read bits
+						blockexpt -= FP::ebias;			//Assume encoded with bias, and remove this bias from exponent
+
+						m_block_maxprec.write(get_block_maxprec(blockexpt));	//Compute and output per-block maxprec.
+						bhdr.set_exp(blockexpt);
+						s_blk_start.ready_w(true);
+					}
+					else						//zero block. move to skip bits.
+					{
+						m_bp.valid_w(false);	//turn off feedback loop
+						s_bc.ready_w(false);
+
+						skpbts.write(true);		//prepare to skip bits
+					}
+
+					c_wordoff.write(w_wordoff);
+					c_rembits.write(w_rembits);
+
+					m_bhdr.data_w(bhdr);
+					m_bhdr.valid_w(true);
 				}
-				else						//zero block. move to skip bits.
+				else						//not all bits read in previous block. Prepare to skip unused bits next cycle.
 				{
-					m_bp.valid_w(false);	//turn off feedback loop
+					bhdr.set_zb(true);		//indicate to get block logic that it is not time to decode a block
+					m_bhdr.valid_w(false);	//Do not send out a zero block downstream.
+
+					m_bp.valid_w(false);	//turn off decode_ints feedback loop
 					s_bc.ready_w(false);
 
 					skpbts.write(true);		//prepare to skip bits
 				}
-
-				c_wordoff.write(w_wordoff);
-				c_rembits.write(w_rembits);
-
-				m_bhdr.data_w(bhdr);
-				m_bhdr.valid_w(true);
-
 			}
 			else
 			{
