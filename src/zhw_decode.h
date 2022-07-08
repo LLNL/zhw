@@ -1156,19 +1156,20 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 						get_window(b_wrk,dreg_bits);
 					}
 					else
-					{																		//flush extra bitstream window register if "remainder bits" end at a bitstream window register boundary.
+					{											//flush extra bitstream window register if "remainder bits" end at a bitstream window register boundary.
 						dreg_bits = w_rembits;
 						get_window(b_wrk,c_wordoff.read()+dreg_bits);
 					}
 
-					c_rembits.write((w_rembits-dreg_bits));									//update minimum remaining bits (to skip) for this block
+					c_rembits.write((w_rembits-dreg_bits));		//update minimum remaining bits (to skip) for this block
 
-					if(w_rembits > bw_w(2))													//check if finished skipping bits
-						skpbts.write(true);													//not finished skipping
-					else																	//finished skipping, fix up bitstream offset and enable header search.
+					if(w_rembits > bw_w(2))						//check if finished skipping bits
+						skpbts.write(true);						//not finished skipping
+					else										//finished skipping, fix up bitstream offset and enable header search.
 					{
-						c_wordoff.write((c_wordoff.read()+dreg_bits)%bw_w(2));				//modify the bitstream window register offset used by decoder to account for dreg bits
-						skpbts.write(false);												//enable header search.
+
+						c_wordoff.write((c_wordoff.read()+dreg_bits)%bw_w(2));			//modify the bitstream window register offset used by decoder to account for dreg bits
+						skpbts.write(false);					//enable header search.
 					}
 
 				}
@@ -1179,39 +1180,39 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 			//Get block header if necessary.
 			if(		(!csync.read() && _s_blk_cycle)			//start of block &&
-					&& !skpbts.read()						//not skipping bits &&
-					&& (m_bp.ready_r() && s_bc.valid_r())	//feedback loop is not stalled
+					&& !skpbts.read()						//not skipping bits already &&
+					&& (m_bp.ready_r() && s_bc.valid_r())	//feedback loop is not stalled &&
 															)
 			{
-				if(c_rembits.read() == 0)	//if all bits were read in previous block, detect zfp header
+				if(c_rembits.read() == 0)	//should be skipping bits, not detecting a header.
 				{
-					w_rembits = s_maxbits.read();//Assume maxbits are available in the bitstream (well formed block).
-					w_wordoff+=s_bc.data_r();
-
+					//start of zerobit flow A
+					w_rembits = s_maxbits.read();				//Assume maxbits are available in the bitstream (well formed block). TODO If this is not true, the module will hang!!
 					bhdr.set_zb(!(get_window(b_wrk,w_wordoff)&1));
 					w_wordoff+=1;
 
-					w_wordoff = w_wordoff%bw_w(2);	//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
-					w_rembits -= 1;					//keep track of all read bits
-					if(!bhdr.zb)					//if no zero block, read an exponent.
+					w_wordoff = w_wordoff%bw_w(2);				//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
+					w_rembits -= 1;								//keep track of all read bits
+					if(!bhdr.zb)								//if no zero block, read an exponent.
 					{
 						expo_t blockexpt = get_window(b_wrk,w_wordoff);	//Extract the exponent from valid bitstream window
 						w_wordoff+=FP::ebits;
 
-						w_wordoff = w_wordoff%bw_w(2);	//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
-						w_rembits -= FP::ebits;			//keep track of all read bits
-						blockexpt -= FP::ebias;			//Assume encoded with bias, and remove this bias from exponent
+						w_wordoff = w_wordoff%bw_w(2);			//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
+						w_rembits -= FP::ebits;					//keep track of all read bits
+																//TODO: remove unecessary ebias subtraction and re-adittion later downstream.
+						blockexpt -= FP::ebias;					//Assume encoded with bias, and remove this bias from exponent
 
 						m_block_maxprec.write(get_block_maxprec(blockexpt));	//Compute and output per-block maxprec.
 						bhdr.set_exp(blockexpt);
 						s_blk_start.ready_w(true);
 					}
-					else						//zero block. move to skip bits.
+					else										//zero block. move to skip bits.
 					{
-						m_bp.valid_w(false);	//turn off feedback loop
+						m_bp.valid_w(false);					//turn off feedback loop
 						s_bc.ready_w(false);
 
-						skpbts.write(true);		//prepare to skip bits
+						skpbts.write(true);						//prepare to skip bits
 					}
 
 					c_wordoff.write(w_wordoff);
@@ -1219,16 +1220,21 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 					m_bhdr.data_w(bhdr);
 					m_bhdr.valid_w(true);
+					//end of zerobit flow A
 				}
-				else						//not all bits read in previous block. Prepare to skip unused bits next cycle.
+				else
 				{
-					bhdr.set_zb(true);		//indicate to get block logic that it is not time to decode a block
-					m_bhdr.valid_w(false);	//Do not send out a zero block downstream.
+					//shutdown header register
+					bhdr.set_zb(true);						//indicate to get block logic that it is not time to decode a block
 
-					m_bp.valid_w(false);	//turn off decode_ints feedback loop
+					//shutdown header port
+					m_bhdr.valid_w(false);					//Do not send out a zero block downstream please.
+
+					//please skip remaining bits.
+					m_bp.valid_w(false);					//turn off feedback loop
 					s_bc.ready_w(false);
 
-					skpbts.write(true);		//prepare to skip bits
+					skpbts.write(true);						//prepare to skip bits
 				}
 			}
 			else
@@ -1247,21 +1253,21 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 					)
 			{
-				if(!_s_blk_cycle)										//if the start of the block, w_rembits was actually set already.
-					w_rembits = c_rembits.read() - s_bc.data_r();		//if not the start of the block, retrieve number of remaining bits.
+				if(!_s_blk_cycle)											//if the start of the block, w_rembits was actually set already.
+					w_rembits = c_rembits.read() - s_bc.data_r();			//if not the start of the block, retrieve number of remaining bits.
 
 				//read in next bit count
 				if(!_s_blk_cycle)
-					w_wordoff+=s_bc.data_r();							//use last cycles feedback to offset to next bit plane window
-				sc_uint<bw_w(2) > planewdw= get_window(b_wrk,w_wordoff);//get window in bitstream. could span b1, b2 and b3 after get_expt.
-				w_wordoff = w_wordoff%bw_w(2);							//Register file offset should drop to a bit offset for the 0th register
+					w_wordoff+=s_bc.data_r();								//use last cycles feedback to offset to next bit plane window
+				sc_uint<bw_w(2) > planewdw= get_window(b_wrk,w_wordoff);	//get window in bitstream. could span b1, b2 and b3 after get_expt.
+				w_wordoff = w_wordoff%bw_w(2);								//Register file offset should drop to a bit offset for the 0th register
 
 				//Bitplane data is to be output.
 				m_bp.data_w(planewdw);
 				m_bp.valid_w(true);
 				s_bc.ready_w(true);
-				c_wordoff.write(w_wordoff);						//update register file offset register for next cycle
-				c_rembits.write(w_rembits);						//update "remaining bits" counter register for next cycle
+				c_wordoff.write(w_wordoff);					//update register file offset register for next cycle
+				c_rembits.write(w_rembits);					//update "remaining bits" counter register for next cycle
 			}
 			else
 			{
