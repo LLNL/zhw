@@ -2,6 +2,8 @@
 #define DECODE_FULL_TB
 
 #include "zhwconfig.h"
+#include "tcasestream_2D.h"
+#include "tcasestream_2D_rate64.h"
 
 //test cases available with compile switches.
 #define DECODE_FULL_TB_MULTI_BLOCK_TEST

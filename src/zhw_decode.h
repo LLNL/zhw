@@ -430,8 +430,8 @@ struct decode_block<FP, 3> : sc_module
 
 	void mc_proc()
 	{
-		s_ready.write(m_ready.read()); // bypass u_xt, u_yt, & u_zt s_ready
-		m_valid.write(c_xt_valid[0]);	//forward xt transform valid out of decode_block.
+		s_ready.write(m_ready.read()); 		// bypass u_xt, u_yt, & u_zt s_ready
+		m_valid.write(c_xt_valid[0][0]);	//forward xt transform valid out of decode_block.
 	}
 
 	void ms_rev_order()
@@ -589,25 +589,28 @@ struct decode_block<FP, 3> : sc_module
 		{
 			for (int j = 0; j < 4; j++)
 			{
+				//out module
 				u_xt[k][j].clk(clk);
 				u_xt[k][j].reset(reset);
-				u_xt[k][j].s_valid(c_zt_valid[0]);
+				u_xt[k][j].s_valid(c_yt_valid[0][0]); // only index [0][0] used
 				u_xt[k][j].s_ready(c_xt_ready[k][j]); // output not used
-				u_xt[k][j].m_valid(c_xt_valid[k][j]); // only index [0][0] used
+				u_xt[k][j].m_valid(c_xt_valid[k][j]);
 				u_xt[k][j].m_ready(m_ready);
 
+				//from z->y->x.
 				u_yt[k][j].clk(clk);
 				u_yt[k][j].reset(reset);
-				u_yt[k][j].s_valid(xors_valid);			// This permutation step starts after xor arithmetic
+				u_yt[k][j].s_valid(c_zt_valid[0][0]); 	// only index [0][0] used
 				u_yt[k][j].s_ready(c_yt_ready[k][j]); 	// output not used
-				u_yt[k][j].m_valid(c_yt_valid[k][j]); 	// only index [0][0] used
+				u_yt[k][j].m_valid(c_yt_valid[k][j]);
 				u_yt[k][j].m_ready(m_ready);
 
+				//in module
 				u_zt[k][j].clk(clk);
 				u_zt[k][j].reset(reset);
-				u_zt[k][j].s_valid(c_yt_valid[0][0]);
-				u_zt[k][j].s_ready(c_zt_ready[k][j]); // output not used
-				u_zt[k][j].m_valid(c_zt_valid[k][j]); // only index [0][0] used
+				u_zt[k][j].s_valid(xors_valid);			// This permutation step starts after xor arithmetic
+				u_zt[k][j].s_ready(c_zt_ready[k][j]); 	// output not used
+				u_zt[k][j].m_valid(c_zt_valid[k][j]);
 				u_zt[k][j].m_ready(m_ready);
 
 				//connect: permutation  ->lift  ->permutation  ->lift  ->permutation  ->lift  ->output
@@ -629,7 +632,7 @@ struct decode_block<FP, 3> : sc_module
 
 		SC_METHOD(mc_proc);
 			sensitive << m_ready;
-			sensitive << c_xt_valid[0];
+			sensitive << c_xt_valid[0][0];
 		SC_METHOD(ms_rev_order);
 			sensitive << clk.pos();
 			dont_initialize();
@@ -927,24 +930,25 @@ template<typename FP>
 inline void sc_trace(sc_trace_file*& f, const block_header<FP>& val, std::string name){sc_trace(f,val.zb, name + ".zb");sc_trace(f, val.exp, name + ".exp");}
 
 
-//--------    custom buffer type    --------
+//--------    custom "smart register" type    --------
 
 //Declare struct
 template<int DIM> struct plane_reg
 {
 	bool f;					//full flag.
-	sc_uint<bw_w(DIM)> w;	//word
+	sc_uint<pr_w(DIM)> w;	//word
 	plane_reg(){f=false;w=0;}
-	plane_reg(sc_uint<bw_w(DIM)> wi){f=true;w=wi;}
+	plane_reg(sc_uint<pr_w(DIM)> wi){f=true;w=wi;}
 	plane_reg& operator=(const plane_reg<DIM>& rhs){f = rhs.f; w = rhs.w; return *this;}
 	bool operator==(const plane_reg<DIM>& rhs){return f == rhs.f && w == rhs.w;}
 
 	//setter pattern
 public:
-	plane_reg& set_word(sc_uint<bw_w(DIM)> nw) { f=true; w = nw; return *this; } //"fluent" API to set word.
+	plane_reg& set_word(sc_uint<pr_w(DIM)> nw) { f=true; w = nw; return *this; } //"fluent" API to set word.
 
 	bool is_empty(){return f;}
 };
+
 
 //overload operators.
 template<int DIM>
@@ -952,7 +956,118 @@ std::ostream& operator<<(std::ostream& os, const plane_reg<DIM>& val){os << "f =
 template<int DIM>
 inline void sc_trace(sc_trace_file*& f, const plane_reg<DIM>& val, std::string name){sc_trace(f,val.f, name + ".f");sc_trace(f, val.w, name + ".w");}
 
-//It is necessary to implement a different decode_stream depending on DIM and FP settings
+//"smart register file" bit plane windowing function specialization (used by decode_stream to output data for decode_ints)
+template<int DIM>
+inline sc_bv<pr_w(DIM) > get_window(plane_reg<DIM> (&wb_c)[sr_sz(DIM)],		//current cycle bitstream register file
+									sc_uint<log2rz(pr_w(DIM))+2> bitoff);		//current cycle working bit offset within register file.
+
+//--------    decode_stream specialized helpers for smart register access.    --------
+
+//2D case smart register window. 2x 32Bit smart registers compose a 32Bit bitplane window.
+inline sc_bv<pr_w(2) > get_window(plane_reg<2> (&wb_c)[sr_sz(2)],		//current cycle bitstream register file
+									sc_uint<log2rz(pr_w(2))+2> bitoff)		//current cycle working bit offset within register file.
+{
+
+	sc_uint<log2rz(pr_w(2))+1> wordoff = bitoff/pr_w(2);
+	for(int i =0; i<sr_sz(2); i++)
+	{
+		if(!wb_c[i].f)wordoff++;						//corner case where something else cleared a full flag.
+		if(wb_c[i].f)break;
+	}
+	sc_bv<pr_w(2)> b1(wb_c[wordoff].w), b2(wb_c[wordoff+1].w),window;
+	for(sc_uint<log2rz(sr_sz(2))+1>i=0; i<wordoff; i++)wb_c[i].f=false;	//clear any full flags necessary
+
+	sc_uint<log2rz(pr_w(2))+2>b1rshift = bitoff%pr_w(2);
+	sc_uint<log2rz(pr_w(2))+2>b2lshift = pr_w(2) - b1rshift;
+
+	if(b1rshift!=0)
+		window = ((b1 >> b1rshift) | (b2 << b2lshift));
+	else
+		window = b1;
+
+	return window;
+}
+
+//1D case smart register window. 2x 16 Bit smart registers compose an 8 Bit window for decode ints or 11 Bit window for block header extraction
+//Since constexpr's can be used to modify register widths, code is expressed identicaly to 2D version.
+inline sc_bv<pr_w(1) > get_window(plane_reg<1> (&wb_c)[sr_sz(1)],			//current cycle bitstream register file
+										sc_uint<log2rz(pr_w(1))+2> bitoff)	//current cycle working bit offset within register file.
+{
+
+	sc_uint<log2rz(pr_w(1))+1> wordoff = bitoff/pr_w(1);
+	for(int i =0; i<sr_sz(1); i++)
+	{
+		if(!wb_c[i].f)wordoff++;						//corner case where something else cleared a full flag.
+		if(wb_c[i].f)break;
+	}
+	sc_bv<pr_w(1)> b1(wb_c[wordoff].w), b2(wb_c[wordoff+1].w),window;
+	for(sc_uint<log2rz(sr_sz(1))+1>i=0; i<wordoff; i++)wb_c[i].f=false;	//clear any full flags necessary
+
+	sc_uint<log2rz(pr_w(1))+2>b1rshift = bitoff%pr_w(1);
+	sc_uint<log2rz(pr_w(1))+2>b2lshift = pr_w(1) - b1rshift;
+
+	if(b1rshift!=0)
+		window = ((b1 >> b1rshift) | (b2 << b2lshift));
+	else
+		window = b1;
+
+	return window;
+}
+
+
+//Assume machine shift register width is max 32.
+//constexpr int pr_w(int dim) {return dim < 2 ? 16 : bw_w(2);};			//bit plane register datatype width
+//constexpr int sr_sz(int dim){return dim == 1 ? 8 : dim == 2 ? 4 : 16;};	//number of smart registers.
+//constexpr int r_th(int dim){return dim == 1 ? 5 : dim == 2 ? 3 : 13;}	//do not drop register file content below this level.
+//3D case smart register window. 8x 32Bit smart registers compose a 64Bit bitplane window.
+//additional code is needed to construct the window as compared with 1D and 2D to access more registers.
+inline sc_bv<bw_w(3) > get_window(plane_reg<3> (&wb_c)[sr_sz(3)],					//current cycle bitstream register file
+										sc_uint<log2rz(pr_w(3))+3> bitoff)		//current cycle working bit offset within register file.
+{
+
+	sc_uint<log2rz(sr_sz(3))+1> wordoff = bitoff/pr_w(3);	//max word is 64>n words = 16
+	//sc_uint<log2rz(pr_w(DIM))+1> wordoff = bitoff/pr_w(DIM);	//max word is 64>n words = 16
+	for(int i =0; i<sr_sz(3); i++)
+	{
+		if(!wb_c[i].f)wordoff++;						//corner case where something else cleared a full flag.
+		if(wb_c[i].f)break;
+	}
+
+	//get candidate registers needed to build window
+	sc_uint<pr_w(3)> 	b1(wb_c[wordoff].w), 	b2(wb_c[wordoff+1].w),
+						b3(wb_c[wordoff+2].w), 	b4(wb_c[wordoff+3].w),
+						b5(wb_c[wordoff+4].w);							//32 bits wide
+
+	//declare window.
+	sc_bv<bw_w(3)> window;												//128 bits wide
+	for(sc_uint<log2rz(sr_sz(3))+1>i=0; i<wordoff; i++)wb_c[i].f=false;	//clear any full flags necessary
+
+	sc_uint<log2rz(pr_w(3))+2>b1rshift = bitoff%pr_w(3);
+	sc_uint<log2rz(pr_w(3))+2>b2lshift = pr_w(3) - b1rshift;
+
+//TODO: concatenate the chunks into a 128bit type
+	//place shift register pieces within window in 32 bit chunks
+	if(b1rshift!=0)
+	{
+		window.range(31,0) 		= ((b1 >> b1rshift) | (b2 << b2lshift));
+		window.range(63,32)		= ((b2 >> b1rshift) | (b3 << b2lshift));
+		window.range(95,64)		= ((b3 >> b1rshift) | (b4 << b2lshift));
+		window.range(127,96)	= ((b4 >> b1rshift) | (b5 << b2lshift));
+	}
+	else
+	{
+//		window = b1;
+		window.range(31,0) 		= b1;
+		window.range(63,32)		= b2;
+		window.range(95,64)		= b3;
+		window.range(127,96)	= b4;
+	}
+
+	return window;
+}
+
+//decode_stream. Implement bitstream reader abstraction with a rewind function, to guarantee 0 offset bitplanes for decode_ints.
+//Template selects implementation decode_stream smart register configuration depending on DIM and FP settings
 template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 {
 	typedef typename FP::expo_t expo_t;
@@ -962,7 +1077,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 	sc_in<bool> clk;
 	sc_in<bool> reset;
 
-	/*-------- ports --------*/
+	//-------- ports --------
 	sc_in <uconfig_t> s_minbits;
 	sc_in <uconfig_t> s_maxbits;
 	sc_in <uconfig_t> s_maxprec;
@@ -983,9 +1098,9 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 	sc_stream<B> c_s_bfifo, c_m_bfifo;
 
 
-	/*-------- registers --------*/
-	sc_signal< plane_reg<2> > b_c[4];							//current plane flit width "bit stream window" shift registers.
-	sc_signal<sc_uint<log2rz(fpblk_sz(2))+2> >c_wordoff;		//amount to offset b1 and b2 on each cycle
+	//-------- registers --------
+	sc_signal< plane_reg<DIM> > b_c[sr_sz(DIM)];				//current plane flit width "bit stream window" shift registers.
+	sc_signal<sc_uint<log2rz(pr_w(DIM))+3> >c_wordoff;			//amount to offset b1 and b2 on each cycle
 																//note: +2 to support offset of max window (log2(16)+1 = 32) + extra exponent bits & zero bit
 	sc_signal<sconfig_t> c_rembits;					//used to safely drain register file without incorrect stalling on final few planes
 
@@ -994,26 +1109,24 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 	sc_signal<bool> csync;							//Stall clocked thread on register file, header ready signal...
 	sc_signal<bool> skpbts;							//skipping bits
-	/*-------- local --------*/
+	//-------- local --------
 
 
-	/*-------- modules --------*/
+	//-------- modules --------
 	sfifo_cc<B,2,RLEVEL> u_bfifo;					//use to keep register file full. SWITCH TO SC_RVD (sc_rvd is a stream is synthesizable) fifo_cc (not a stream)
 
-
 	//Register file maintainence logic. Use pass by reference, which is supported: https://verificationguide.com/systemc/systemc-functions-argument-passing/
-	inline bool refresh_next_bs_regs(plane_reg<2> (&pb_c)[4])				//write update to smart register file (b_n) using: A; processed current registers (pb_c).
+	inline bool refresh_next_bs_regs(plane_reg<DIM> (&pb_c)[sr_sz(DIM)])	//write update to smart register file (b_n) using: A; processed current registers (pb_c).
 																			//												   B; incoming bitstream data (s_bits.data_r())
 	{																		//return value is used for bitstream ready_w() (do not listen to bitstream if buffer is full)
 
-		constexpr int reg_thresh = 3;
+		constexpr int reg_thresh = r_th(DIM);
 		B word = c_m_bfifo.data_r();
 
-
 		//each read from bitstream gives 2 "words" for the decode ints module.
-		plane_reg<2>w[B::dbits/bw_w(2)];
-		plane_reg<2>empty;
-		plane_reg<2>tmp[4];
+		plane_reg<DIM>w[B::dbits/pr_w(DIM)];
+		plane_reg<DIM>empty;
+		plane_reg<DIM>tmp[sr_sz(DIM)];
 
 		bool read_data = false;	//write to the "ready" port of fifo so that a new word falls through next cycle.
 
@@ -1022,23 +1135,25 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 			//1) down shift register file so that full registers start at index 0
 			//2) read in new bitstream data from bitstream FIFO and put it at the end of register file
 
+//fails when B is too narrow, as in 3D. Fix is to interpose this module with a widening FIFO that gives 128bit wide "B" in 3D case.
 			if(c_m_bfifo.ready_r())
 			{
 				//chop the latest bitstream word into "sliding window (bw_w)" sized pieces and store in an array, "w"
-				for(size_t i=0; i < B::dbits/bw_w(2); i++)
-					w[i] = plane_reg<2>((sc_uint<bw_w(2)>)(word.tdata>>(bw_w(2)*i)));
+				for(size_t i=0; i < B::dbits/pr_w(DIM); i++)
+					w[i] = plane_reg<DIM>((sc_uint<pr_w(DIM)>)(word.tdata>>(pr_w(DIM)*i)));
 			}
 			//else... have to just drain the register file by writing 0 in place of emptied registers.
 
+
 			//1) Down shift register file...
 			//1.a, get lowest empty register
-			sc_uint<log2rz(4)+1>srcreg;
-			for(srcreg =0; srcreg< 4; srcreg++)
+			sc_uint<log2rz(sr_sz(DIM))+1>srcreg;
+			for(srcreg =0; srcreg< sr_sz(DIM); srcreg++)
 				if(pb_c[srcreg].f)break;
 
 			//1. b, Down shift register file st. full registers start at index 0
-			sc_uint<log2rz(4)+1>tgtreg;
-			for(tgtreg=0; srcreg<4; srcreg++,tgtreg++)
+			sc_uint<log2rz(sr_sz(DIM))+1>tgtreg;
+			for(tgtreg=0; srcreg<sr_sz(DIM); srcreg++,tgtreg++)
 			{
 				if(!pb_c[srcreg].f)	break;
 				else				tmp[tgtreg]=pb_c[srcreg];
@@ -1047,18 +1162,19 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 			//2) copy in new data from bitstream fifo.
 			if(tgtreg<reg_thresh)
 			{
-				for(size_t i=0; i < B::dbits/bw_w(2); i++)
+				for(size_t i=0; i < B::dbits/pr_w(DIM); i++)
 					tmp[tgtreg++]=w[i];
 			}
 
 		}
 		else
-			{tmp[0]=pb_c[0]; tmp[1]=pb_c[1]; tmp[2]=pb_c[2]; tmp[3]=pb_c[3];}	//If fifo data is not valid, do not update the register file.
+			{for(size_t i=0; i<sr_sz(DIM); i++){tmp[i]=pb_c[i];}}	//If fifo data is not valid, do not update the register file.
 
 		//assign next state registers
-		b_c[0].write(tmp[0]); b_c[1].write(tmp[1]); b_c[2].write(tmp[2]); b_c[3].write(tmp[3]);
+		for(size_t i=0; i<sr_sz(DIM); i++){b_c[i].write(tmp[i]);}
 
-		if(!tmp[2].f)			//the register file is empty enough to take in more data.
+
+		if(!tmp[reg_thresh-1].f)			//the register file is empty enough to take in more data.
 			read_data = true;
 		else
 			read_data = false;
@@ -1069,20 +1185,21 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 	}
 
 	//bitplane window offset logic. construct bitplane window
-	inline sc_uint<bw_w(2) > get_window(plane_reg<2> (&wb_c)[4],					//current cycle bitstream register file
-										sc_uint<log2rz(fpblk_sz(2))+2> bitoff)		//current cycle working bit offset within register file.
+/*	inline sc_uint<pr_w(DIM) > get_window(plane_reg<DIM> (&wb_c)[sr_sz(DIM)],					//current cycle bitstream register file
+										sc_uint<log2rz(pr_w(DIM))+2> bitoff)		//current cycle working bit offset within register file.
 	{
-		sc_uint<2> wordoff = bitoff/bw_w(2);
-		for(int i =0; i<4; i++)
+
+		sc_uint<log2rz(pr_w(DIM))+1> wordoff = bitoff/pr_w(DIM);
+		for(int i =0; i<sr_sz(DIM); i++)
 		{
 			if(!wb_c[i].f)wordoff++;						//corner case where something else cleared a full flag.
 			if(wb_c[i].f)break;
 		}
-		sc_uint<bw_w(2)> b1(wb_c[wordoff].w), b2(wb_c[wordoff+1].w),window;
-		for(sc_uint<2>i=0; i<wordoff; i++)wb_c[i].f=false;	//clear any full flags necessary
+		sc_uint<pr_w(DIM)> b1(wb_c[wordoff].w), b2(wb_c[wordoff+1].w),window;
+		for(sc_uint<log2rz(sr_sz(DIM))+1>i=0; i<wordoff; i++)wb_c[i].f=false;	//clear any full flags necessary
 
-		sc_uint<log2rz(fpblk_sz(2))+2>b1rshift = bitoff%bw_w(2);
-		sc_uint<log2rz(fpblk_sz(2))+2>b2lshift = bw_w(2) - b1rshift;
+		sc_uint<log2rz(pr_w(DIM))+2>b1rshift = bitoff%pr_w(DIM);
+		sc_uint<log2rz(pr_w(DIM))+2>b2lshift = pr_w(DIM) - b1rshift;
 
 		if(b1rshift!=0)
 			window = ((b1 >> b1rshift) | (b2 << b2lshift));
@@ -1091,6 +1208,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 		return window;
 	}
+	*/
 
 	//blockwise maximum precision computation
 	inline uconfig_t get_block_maxprec(expo_t maxexp) //see (zfp) src/template/codecf.c:6 "precision"
@@ -1131,8 +1249,10 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 			c_m_bfifo.ready_w(false);
 			c_rembits = 0;
 		} else {
-			plane_reg<2>b_wrk[4] ={b_c[0].read(),b_c[1].read(),b_c[2].read(),b_c[3].read()}; //get most up to date register file.
-			sc_uint<log2rz(fpblk_sz(2))+2>w_wordoff = c_wordoff.read();
+			plane_reg<DIM>b_wrk[sr_sz(DIM)];
+			for(size_t i=0; i<sr_sz(DIM); i++){b_wrk[i]=b_c[i].read();}	//get most up to date register file.
+
+			sc_uint<log2rz(pr_w(DIM))+3>w_wordoff = c_wordoff.read();
 			bool _s_blk_cycle = ((s_blk_start.data_r()==true) && s_blk_start.valid_r());
 
 			block_header<FP> bhdr(true);													//concatenate zero bit and exponent into one message
@@ -1150,9 +1270,9 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 					sconfig_t dreg_bits;	//bits to skip.
 
 					//flush padding words in bitstream register file (maximum of one register flushed per clock cycle)
-					if(w_rembits/bw_w(2))
+					if(w_rembits/pr_w(DIM))
 					{																		//flush all whole padding bitstream windows in bitstream register file
-						dreg_bits = bw_w(2);
+						dreg_bits = pr_w(DIM);
 						get_window(b_wrk,dreg_bits);
 					}
 					else
@@ -1163,12 +1283,12 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 					c_rembits.write((w_rembits-dreg_bits));		//update minimum remaining bits (to skip) for this block
 
-					if(w_rembits > bw_w(2))						//check if finished skipping bits
+					if(w_rembits > pr_w(DIM))						//check if finished skipping bits
 						skpbts.write(true);						//not finished skipping
 					else										//finished skipping, fix up bitstream offset and enable header search.
 					{
 
-						c_wordoff.write((c_wordoff.read()+dreg_bits)%bw_w(2));			//modify the bitstream window register offset used by decoder to account for dreg bits
+						c_wordoff.write((c_wordoff.read()+dreg_bits)%pr_w(DIM));			//modify the bitstream window register offset used by decoder to account for dreg bits
 						skpbts.write(false);					//enable header search.
 					}
 
@@ -1188,17 +1308,17 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 				{
 					//start of zerobit flow A
 					w_rembits = s_maxbits.read();				//Assume maxbits are available in the bitstream (well formed block). TODO If this is not true, the module will hang!!
-					bhdr.set_zb(!(get_window(b_wrk,w_wordoff)&1));
+					bhdr.set_zb(!(get_window(b_wrk,w_wordoff)[0]));
 					w_wordoff+=1;
 
-					w_wordoff = w_wordoff%bw_w(2);				//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
+					w_wordoff = w_wordoff%pr_w(DIM);			//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
 					w_rembits -= 1;								//keep track of all read bits
 					if(!bhdr.zb)								//if no zero block, read an exponent.
 					{
 						expo_t blockexpt = get_window(b_wrk,w_wordoff);	//Extract the exponent from valid bitstream window
 						w_wordoff+=FP::ebits;
 
-						w_wordoff = w_wordoff%bw_w(2);			//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
+						w_wordoff = w_wordoff%pr_w(DIM);		//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
 						w_rembits -= FP::ebits;					//keep track of all read bits
 																//TODO: remove unecessary ebias subtraction and re-adittion later downstream.
 						blockexpt -= FP::ebias;					//Assume encoded with bias, and remove this bias from exponent
@@ -1259,8 +1379,9 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 				//read in next bit count
 				if(!_s_blk_cycle)
 					w_wordoff+=s_bc.data_r();								//use last cycles feedback to offset to next bit plane window
-				sc_uint<bw_w(2) > planewdw= get_window(b_wrk,w_wordoff);	//get window in bitstream. could span b1, b2 and b3 after get_expt.
-				w_wordoff = w_wordoff%bw_w(2);								//Register file offset should drop to a bit offset for the 0th register
+				sc_bv<bw_w(DIM) > planewdw= get_window(b_wrk,w_wordoff);	//get window in bitstream. could span b1, b2 and b3 after get_expt.s
+//need bit vector, uint not wide enough sc_uint<bw_w(DIM) > planewdw= get_window(b_wrk,w_wordoff);	//get window in bitstream. could span b1, b2 and b3 after get_expt.
+				w_wordoff = w_wordoff%pr_w(DIM);								//Register file offset should drop to a bit offset for the 0th register
 
 				//Bitplane data is to be output.
 				m_bp.data_w(planewdw);
@@ -1303,7 +1424,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 		sc_trace(tf, s_blk_start,	(std::string(name())+".s_blk_start").c_str());
 
 		//Working registers
-		for(size_t i = 0; i < 4; i++)
+		for(size_t i = 0; i < sr_sz(DIM); i++)
 			sc_trace(tf, b_c[i],    	(std::string(name())+".b_c"+std::to_string(i)).c_str());
 
 		sc_trace(tf, c_wordoff, (std::string(name())+".c_wordoff").c_str());
@@ -1333,7 +1454,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 			sensitive << c_s_bfifo.ready_event();				//pipe FIFO full signal to bitstream
 			sensitive << m_bhdr.ready_chg();
 			sensitive << m_bp.ready_chg();
-			for(size_t i=0; i<4; i++){sensitive << b_c[i];}		//sensitize to changes in register file
+			for(size_t i=0; i<sr_sz(DIM); i++){sensitive << b_c[i];}		//sensitize to changes in register file
 			sensitive << s_minbits << s_maxbits << s_maxprec << s_minexp;
 			sensitive << s_blk_start.valid_chg() << s_blk_start.data_chg();
 			sensitive << c_rembits;

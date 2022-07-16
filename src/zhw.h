@@ -43,6 +43,16 @@ constexpr int bc_w(int dim) {return 2*dim+2;} // bit count width
 constexpr int bp_w(int dim) {return 2*fpblk_sz(dim)+1;} // bit plane width MB: bug bug, this is incorrect and should be "-1" not "+1"
 constexpr int bw_w(int dim) {return 2*fpblk_sz(dim);}// bit window (max encoded bit plane width) + 1
 
+//decoder support 1-3D
+//constexpr int pr_w(int dim) {return dim < 2 ? 16 : bw_w(dim);};	//bit plane register datatype width
+//constexpr int sr_sz(int dim){return dim < 2 ? 8 : 4;};			//number of smart registers. Minimum is 3 for 3d but that is complicated. 1D must have 8 to make things work.
+//constexpr int r_th(int dim){return dim < 2 ? 5 : 3;}		//do not drop register file content below this level.
+
+//Assume machine shift register width is max 32.
+constexpr int pr_w(int dim) {return dim < 2 ? 16 : bw_w(2);};			//bit plane register datatype width
+constexpr int sr_sz(int dim){return dim == 1 ? 8 : dim == 2 ? 4 : 16;};	//number of smart registers.
+constexpr int r_th(int dim){return dim == 1 ? 5 : dim == 2 ? 3 : 13;}	//do not drop register file content below this level.
+
 template<class T>
 constexpr const T& max(const T& a, const T& b)
 {return a > b ? a : b;}

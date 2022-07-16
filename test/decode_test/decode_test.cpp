@@ -1,4 +1,4 @@
-#define DECODER_DIM 1 /*2*/		/*Which dimension of zhw decoder pipeline to test? todo: support 3D*/
+#define DECODER_DIM /*1*/ 2		/*Which dimension of zhw decoder pipeline to test? todo: support 3D*/
 
 //the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
 #define RESET   "\033[0m"
