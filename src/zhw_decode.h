@@ -1320,8 +1320,7 @@ template<typename FP, typename B, int DIM> struct decode_stream: sc_module
 
 						w_wordoff = w_wordoff%pr_w(DIM);		//working register file offset should drop to a bit offset within the first valid register in b_c[:] register file.
 						w_rembits -= FP::ebits;					//keep track of all read bits
-																//TODO: remove unecessary ebias subtraction and re-adittion later downstream.
-						blockexpt -= FP::ebias;					//Assume encoded with bias, and remove this bias from exponent
+						//redundant. blockexpt -= FP::ebias;	//Assume encoded with bias, and remove this bias from exponent
 
 						m_block_maxprec.write(get_block_maxprec(blockexpt));	//Compute and output per-block maxprec.
 						bhdr.set_exp(blockexpt);
@@ -1507,7 +1506,7 @@ SC_MODULE(inv_cast)
 	void mc_proc()
 	{
 		FP fp;								//IEEE float to stream out of m_stream at a rate of 1 per clock cycle
-		sc_uint<1> s = 0; 					//fp's sign bit (to be determined during a block element re-cast)
+		ui_t s = 0; 					//fp's sign bit (to be determined during a block element re-cast)
 		expo_t _r_ex = 0;					//common exponent for block
 		// --- Control flow ---
 		bool stall = (m_stream.ready_r() == false ||
@@ -1521,7 +1520,8 @@ SC_MODULE(inv_cast)
 
 		// determine if number is negative
 		si_t si = r_blk[count.read()].read();	//convert the current block entry to be streamed out.
-		ui_t neg_mask = (1LL <<(FP::bits-1));	//a mask to see if an unsigned type is negative in twos compliment
+		ui_t neg_mask = (1ULL <<(FP::bits-1));	//a mask to see if an unsigned type is negative in twos compliment
+
 		if(si & neg_mask)						//check if the integer is "negative" in 2's compliment
 			{si = -si; s = 1;}					//separate sign (s) from scalar value
 
@@ -1538,7 +1538,7 @@ SC_MODULE(inv_cast)
 			ui_t rn = ui_t(si);
 
 			// determine position, e, of leading one-bit: 2^e <= y < 2^(e+1)
-			ui_t e = 0;
+			expo_t e = 0;
 			while (rn >> (e + 1))
 			  e++;
 
@@ -1549,8 +1549,8 @@ SC_MODULE(inv_cast)
 			else
 				rn >>= -shift;
 
-			// add in bias, block exponent, and coefficient normalization
-			e += FP::ebias + r_ex.read() - (FP::bits - 2);
+			// add in block exponent, and coefficient normalization
+			e += r_ex.read() - (FP::bits - 2);	//Note: exponent bias was never subtracted and is tf not added here.
 
 			// handle special case of subnormals
 			if (e <= 0)
@@ -1562,7 +1562,7 @@ SC_MODULE(inv_cast)
 			else
 			{
 				// normalized number: zero hidden one-bit
-				rn &= (1ul << FP::fbits) - 1;
+				rn &= (1ULL << FP::fbits) - 1;
 			}
 
 			// construct floating-point value from sign, exponent, and significand

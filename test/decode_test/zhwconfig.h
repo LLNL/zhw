@@ -62,7 +62,7 @@ typedef typename fpn_t::expo_t expo_t;	//the exponent part only of floating poin
 typedef typename fpn_t::si_t si_t;	//an integer representation of the floating point? Not sure what that is
 
 
-#define DEFAULT_BLOCKS 1
+#define DEFAULT_BLOCKS 1024
 #define DEFAULT_RATE (fpn_t::bits)
 #define DEFAULT_TCARG "1"
 
