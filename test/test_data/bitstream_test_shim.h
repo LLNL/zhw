@@ -204,6 +204,9 @@ struct bitstream_tcase
 
 
 	int _dim, _rate, _dataset;
+	size_t _n_dataset_floats;
+	size_t _n_zfp_floats;
+	size_t _n_zfp_flits;
 
 	//dummy
 	bitstream_tcase(){}
@@ -227,6 +230,16 @@ struct bitstream_tcase
 		M_Assert(_floatdata != NULL, fpath.c_str());
 		_bitstream = fopen(zpath.c_str(),"rb");
 		M_Assert(_bitstream != NULL, zpath.c_str());
+		//set up data size counts
+		fseek(_datasetfloatdata, 0L, SEEK_END);
+		_n_dataset_floats = ftell(_datasetfloatdata)/sizeof(uint64_t);
+		rewind(_datasetfloatdata);
+		fseek(_floatdata, 0L, SEEK_END);
+		_n_zfp_floats = ftell(_floatdata)/sizeof(uint64_t);
+		rewind(_floatdata);
+		fseek(_bitstream, 0L, SEEK_END);
+		_n_zfp_flits = ftell(_bitstream)/sizeof(uint64_t);
+		rewind(_bitstream);
 	}
 
 	//cleanup
@@ -242,7 +255,7 @@ struct bitstream_tcase
 
 	//methods
 
-	//Get the next float from validation file. Return false if EOF
+	//Get the next float from dataset file. Return false if EOF
 	bool get_next_data_set_float(FP& next_float)
 	{
 		uint64_t IOfp;
@@ -250,7 +263,8 @@ struct bitstream_tcase
 		ui_t fp(IOfp);												//casting to FP is tricky...
 		next_float = fp;											//but this works ok.
 		return success;
-	}						//attempt to get the next float for test case. Return false if end of floats reached
+	}
+	size_t get_data_set_float_count(){return _n_dataset_floats;}
 
 	//Get the next float from validation file. Return false if EOF
 	bool get_next_zfp_float(FP& next_float)
@@ -261,6 +275,7 @@ struct bitstream_tcase
 		next_float = fp;
 		return success;
 	}
+	size_t get_zfp_float_count(){return _n_zfp_floats;}
 
 	//Get the next flit from bitstream file. Return false if EOF
 	bool get_next_zfp_stream_word(B& next_word)
@@ -270,6 +285,7 @@ struct bitstream_tcase
 		next_word.tdata = IObs;
 		return success;
 	}
+	size_t get_zfp_stream_word_count(){return _n_zfp_flits;}
 
 };
 

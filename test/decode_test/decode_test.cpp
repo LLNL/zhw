@@ -1,3 +1,10 @@
+/*=============================================*\
+|  			decode_test.cpp						|
+|	zhw CODEC decode test. instantiate zhw dut	|
+|	and validate using a selected SDRBench 		|
+|	test vector corresponding to zfp user 		|
+|	selected zfp settings						|
+\*=============================================*/
 #define DECODER_DIM /*1*/ 2	/*3*/ /*Which dimension of zhw decoder pipeline to test? */
 
 //the following are UBUNTU/LINUX, and MacOS ONLY terminal color codes.
@@ -88,25 +95,15 @@ struct tb_driver : public sc_module
 	void ct_send()
 	{
 
-		size_t words_per_block = ptest_case->maxbits/B::dbits;
-		size_t i = 0;			//offset by maxbits/bits_per_bitstream_word
-		size_t nblocks = blocks;//number of encoded blocks in test case
+		size_t tx_words=0;
 		B streamword;			//for a symetric interface, the encoder bitstream abstraction is used in the decoder
 								//However, it is highly desirable to replace this datatype, which is not well suited to task.
 
-		//hold every control signal at 0
 		s_port.reset();			//dut<-the bitstream is outputting valid data at this time.
 		s_port.valid_w(false);
 		wait();
-		cout << CYAN << "INFO: " <<YELLOW << "simple_stream() " << RESET << "test @ " << sc_time_stamp() << endl;
 
-		//skip to first block of interest
-		for(size_t j =0; j< i; j++)
-			for(size_t k =0; k < words_per_block; k++)
-				ptest_case->get_next_zfp_stream_word(streamword);
-
-		//output bitstream words as requested by the decoder.
-		while(i<(nblocks*words_per_block)+4) //In the 2D case, each block is encoded over 2 ui_t's in tcaseunits.h (128 = minbits = maxbits, and, 1 ui_t = 64 bits)
+		while(tx_words < ptest_case->get_zfp_stream_word_count() )	//just dump the whole file at ZHW. nothing sophisticated here.
 		{
 			if(s_port.ready_r())
 			{
@@ -115,6 +112,7 @@ struct tb_driver : public sc_module
 
 				s_port.data_w(streamword);
 				s_port.valid_w(true);
+				tx_words++;
 			}
 			wait();
 		}
@@ -141,13 +139,12 @@ struct tb_driver : public sc_module
 		//enable input.
 		m_port.ready_w(true);
 
-		//TEST 0
 		wait();
 		wait();	//stop console messages getting messy
 
 		//check multiple decoded blocks
-
-		cout << CYAN << "INFO" << RESET << " will test " << CYAN << blocks << RESET << blocks << endl;
+		if(verbose)
+			cout << CYAN << "INFO" << RESET << " will test " << CYAN << blocks << RESET << " blocks" << endl;
 		for(int h=0; h<blocks; h++)
 		{
 			if(verbose)
@@ -188,8 +185,6 @@ struct tb_driver : public sc_module
 					}
 					cout << endl;
 					which_time = sc_time_stamp().to_string();
-cout << RED << "DEBUG" << RESET << "continuing to process..." << endl;
-//					break;
 				}
 			}
 
@@ -201,8 +196,6 @@ cout << RED << "DEBUG" << RESET << "continuing to process..." << endl;
 				{tests_started=true; t0= sc_time_stamp();}
 		}
 		t1 = sc_time_stamp();
-
-		cout << "verbose: " << verbose << endl;
 
 		if(verbose)
 		{
@@ -246,25 +239,30 @@ int sc_main(int argc , char *argv[])
 	int opt;
 	bool nok = false;
 
-	while ((opt = getopt(argc, argv, "d:b:r:t:v")) != -1) {
-		switch (opt) {
+	while ((opt = getopt(argc, argv, "d:b:r:t:v")) != -1)
+	{
+		switch (opt)
+		{
 		case 'b':
 			blocks = atoi(optarg);
-			if (blocks < 1) {
+			if (blocks < 1)
+			{
 				cerr << " -- error: number of blocks must be 1 or greater" << endl;
 				nok = true;
 			}
 			break;
 		case 'r':
 			rate = atof(optarg);
-			if (rate <= 0 || rate > fpn_t::bits) {
+			if (rate <= 0 || rate > fpn_t::bits)
+			{
 				cerr << " -- error: range must be 0 < rate <= " << fpn_t::bits << endl;
 				nok = true;
 			}
 			break;
 		case 'd':
 			test_data = atoi(optarg);
-			if (test_data < 0 || test_data > CESM_ATM) {
+			if (test_data < 0 || test_data > CESM_ATM)
+			{
 				cerr << " -- error: dataset must be 0 < dataset <= " << CESM_ATM << endl;
 				nok = true;
 			}
@@ -276,7 +274,8 @@ int sc_main(int argc , char *argv[])
 			nok = true;
 		}
 	}
-	if (nok || optind < argc) {
+	if (nok || optind < argc)
+	{
 		cerr << "Usage: decode_unit_test -b<int> -r<fp> -s<int> -d<int> -v" << endl;
 		cerr << "  -b  number of blocks, default: " << DEFAULT_BLOCKS << endl;
 		cerr << "  -r  rate, default: " << DEFAULT_RATE << endl;
@@ -316,10 +315,9 @@ int sc_main(int argc , char *argv[])
 
 	pulse<0,2,RLEVEL> u_pulse("u_pulse");
 	tb_driver<fpn_t, enc_t, DECODER_DIM> u_tb_driver("u_tb_driver",&test_case);
-
-	//zhw::encode<fpn_t, DIM, enc_t> u_dut("u_dut");
 	zhw::decode<fpn_t, DECODER_DIM, enc_t> u_dut("u_dut");
 
+	//report zfp/ZHW test settings as a JSON dictionary.
 	cout << "{" << endl;
 	cout << "\"dims\": "   << DECODER_DIM  << ", " <<  endl;
 	cout << "\"dataset\": " << "\"" << DataSetsStr[test_data] << "\"," << endl;
@@ -369,8 +367,8 @@ int sc_main(int argc , char *argv[])
 	sc_trace(tf, c_driver_enc, c_driver_enc.name());
 	sc_trace(tf, c_dut_fp, c_dut_fp.name());
 #endif
-
-	cerr << "INFO: Simulating " << endl;
+	if(verbose)
+		cerr << "INFO: Simulating " << endl;
 
 	// start simulation
 	sc_start(600+(2400*(int)blocks), SC_NS);
@@ -379,6 +377,8 @@ int sc_main(int argc , char *argv[])
 	double cycles_per_block = u_tb_driver.getThroughput()/clk.period();
 	double bytes_per_block = zhw::fpblk_sz(DECODER_DIM)*(fpn_t::bits/8);
 	double fpga_clk = fpga_clks[DECODER_DIM];			//use aproporiate clock.
+
+	//report throughput statistics for the test vector as a JSON dictionary.
 	cout << "{" << endl;
 	cout << "\"Cycles/block\": " << std::fixed << cycles_per_block << ", " << endl;
 	cout << "\"Bytes/block\": " << std::fixed << bytes_per_block << ", " << endl;

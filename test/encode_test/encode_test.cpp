@@ -1,3 +1,14 @@
+/*=============================================*\
+|  			encode_test.cpp						|
+|	zhw CODEC encode test. instantiate zhw dut	|
+|	and validate using a selected SDRBench 		|
+|	test vector corresponding to zfp user 		|
+|	selected zfp settings						|
+\*=============================================*/
+#ifndef _DIM
+#define _DIM /*1*/ 2 /*3*/
+#endif
+
 
 #include <cmath> // floor
 #include <cstdlib> // exit, atoi, atof
@@ -42,10 +53,6 @@
 #endif
 #include "real.h"
 
-#ifndef _DIM
-#define _DIM /*1*/ 2 /*3*/
-#endif
-
 #define BLOCK_LEN zhw::fpblk_sz(_DIM) /* values per block */
 
 typedef fp_t<EXPOW,FRACW> fpn_t;  // floating-point number type
@@ -57,7 +64,7 @@ typedef zhw::uconfig_t uconfig_t; // unsigned configuration parameter type
 #define stringify( name ) #name
 #define enumstringtuple( name ) "{" << name << "," << stringify(name) << "}"
 
-#define DEFAULT_BLOCKS 1024/*1 use block size of the .bod datasets*/
+#define DEFAULT_BLOCKS 1024
 #define DEFAULT_RATE (fpn_t::bits)
 #define DEFAULT_DATA ISABEL
 #define DEFAULT_VERBOSE false
@@ -208,25 +215,30 @@ int sc_main(int argc , char *argv[])
 	int opt;
 	bool nok = false;
 
-	while ((opt = getopt(argc, argv, "d:b:r:t:vg")) != -1) {
-		switch (opt) {
+	while ((opt = getopt(argc, argv, "d:b:r:t:v:g")) != -1)
+	{
+		switch (opt)
+		{
 		case 'b':
 			blocks = atoi(optarg);
-			if (blocks < 1) {
+			if (blocks < 1)
+			{
 				cerr << " -- error: number of blocks must be 1 or greater" << endl;
 				nok = true;
 			}
 			break;
 		case 'r':
 			rate = atof(optarg);
-			if (rate <= 0 || rate > fpn_t::bits) {
+			if (rate <= 0 || rate > fpn_t::bits)
+			{
 				cerr << " -- error: range must be 0 < rate <= " << fpn_t::bits << endl;
 				nok = true;
 			}
 			break;
 		case 'd':
 			test_data = atoi(optarg);
-			if (test_data < 0 || test_data > S3D) {
+			if (test_data < 0 || test_data > CESM_ATM)
+			{
 				cerr << " -- error: dataset be 0 <= dataset < " << CESM_ATM << endl;
 				nok = true;
 			}
@@ -241,7 +253,8 @@ int sc_main(int argc , char *argv[])
 			nok = true;
 		}
 	}
-	if (nok || optind < argc) {
+	if (nok || optind < argc)
+	{
 		cerr << "Usage: test -b<int> -r<fp> -t<int>" << endl;
 		cerr << "  -b  number of blocks, default: " << DEFAULT_BLOCKS << endl;
 		cerr << "  -r  rate, default: " << DEFAULT_RATE << endl;
@@ -293,7 +306,6 @@ int sc_main(int argc , char *argv[])
 	cout << "\"dataset\": " << "\"" << DataSetsStr[test_data] << "\"," << endl;
 	cout << "\"rate\": "   << rate   << ", " << endl;
 	cout << "\"blocks\": " << blocks << ", "<< endl;
-
 	cout << "\"minbits\": " << minbits.get_new_value() << ", " << endl;
 	cout << "\"maxbits\": " << maxbits.get_new_value() << ", " << endl;
 	cout << "\"maxprec\": " << maxprec.get_new_value() << ", " << endl;
@@ -339,11 +351,10 @@ int sc_main(int argc , char *argv[])
 		std::cout.clear();							//turn on cout
 #endif
 
-
-	cerr << "INFO: Simulating " << endl;
+	if(verbose)
+		cerr << "INFO: Simulating " << endl;
 
 	// start simulation 
-	// sc_start(600+(900*(int)blocks), SC_NS);
 	sc_start(600+(2400*(int)blocks), SC_NS);
 
 
