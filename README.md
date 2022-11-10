@@ -5,16 +5,9 @@ The hardware implementation of ZFP is sourced in SystemC to facilitate its evalu
 
 
 ### Getting Started
-- Install the SystemC library
+- Build and install the SystemC library **with c++ 11** support
 - Clone or copy the zhw repository to your system
-
-#### Building Using Make
-- Type "make help" from the top directory for available build and execution options
-
-Environment variables:
-
-- SCDIR:  SystemC source directory
-- ZFPDIR: ZFP (in software) source directory
+- Set your build toolchain to clang-12 or higher
 
 #### Building Using CMake
 - Create an out of source build directory and navigate to it (e.g. mkdir ../zhw_build && cd ../zhw_build)
@@ -23,9 +16,16 @@ Environment variables:
 
 SystemC will be autodetected provided it was integrated into your CMake cache during install (default behavior).
 
+Environment variables:
+
+- LD_LIBRARY_DIR: Must contain a path to the systemc dynamic library
+- PATH: Must contain a path to the install root of the systemc library
+
+A 'make' only build environment is provided but is deprecated. navigate to the testbench directories and type `make help` for information.
+
 #### Testing
 
-Test bench programs have been created with several test cases from the [SDRbench](https://sdrbench.github.io/) data set. ZHW configuration can be modified in these test benches via #define settings, or command line parameters. see test/encode_test/encode_test.cpp or test/decode_test/decode_test.cpp for compiler parameters, or, `run decode_test -h` / `encode_test -h` to review command line parameters. We also provide the parameter sweeping scripts `sweepencoder.sh` and `sweepdecoder.sh` which can be used to validate a matrix of ZHW parameters on SDRBench sample data sets. 
+Test bench programs have been created with several test cases from the [SDRbench](https://sdrbench.github.io/) data set. ZHW configuration can be modified in these test benches via #define settings, or command line parameters. see test/encode_test/encode_test.cpp or test/decode_test/decode_test.cpp for compiler parameters, or, run `decode_test -h` / `encode_test -h` to review command line parameters. We also provide the parameter sweeping scripts `sweepencoder.sh` and `sweepdecoder.sh` which can be used to validate a matrix of ZHW parameters on SDRBench sample data sets. 
 
 
 ### References
