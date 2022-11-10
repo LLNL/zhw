@@ -10,8 +10,8 @@ The hardware implementation of ZFP is sourced in SystemC to facilitate its evalu
 - Set your build toolchain to clang-12 or higher
 
 #### Building Using CMake
-- Create an out of source build directory and navigate to it (e.g. mkdir ../zhw_build && cd ../zhw_build)
-- Invoke cmake specifying the zhw project directory as a build target (e.g. cmake ../zhw)
+- Create an out of source build directory and navigate to it (e.g. `mkdir ../zhw_build && cd ../zhw_build`)
+- Invoke cmake specifying the zhw project directory as a build target, and that unix makefiles should be generated (e.g. `cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../zhw`)
 - Type "make" to build baseline encoder and decoder 2D test programs with .vcd output generation enabled
 
 SystemC will be autodetected provided it was integrated into your CMake cache during install (default behavior).
