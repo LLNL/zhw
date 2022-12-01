@@ -1,0 +1,1290 @@
+[ [{"encoder":1024} ]
+,[ [{"rate":1}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 1, 
+"blocks": 1024, 
+"minbits": 16, 
+"maxbits": 16, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 1, 
+"blocks": 1024, 
+"minbits": 16, 
+"maxbits": 16, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 1, 
+"blocks": 1024, 
+"minbits": 16, 
+"maxbits": 16, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 1, 
+"blocks": 1024, 
+"minbits": 16, 
+"maxbits": 16, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 1, 
+"blocks": 1024, 
+"minbits": 16, 
+"maxbits": 16, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+]
+,[ [{"rate":2}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 2, 
+"blocks": 1024, 
+"minbits": 32, 
+"maxbits": 32, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 2, 
+"blocks": 1024, 
+"minbits": 32, 
+"maxbits": 32, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 2, 
+"blocks": 1024, 
+"minbits": 32, 
+"maxbits": 32, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 2, 
+"blocks": 1024, 
+"minbits": 32, 
+"maxbits": 32, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 2, 
+"blocks": 1024, 
+"minbits": 32, 
+"maxbits": 32, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+]
+,[ [{"rate":3}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 3, 
+"blocks": 1024, 
+"minbits": 48, 
+"maxbits": 48, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 3, 
+"blocks": 1024, 
+"minbits": 48, 
+"maxbits": 48, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 3, 
+"blocks": 1024, 
+"minbits": 48, 
+"maxbits": 48, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 3, 
+"blocks": 1024, 
+"minbits": 48, 
+"maxbits": 48, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 3, 
+"blocks": 1024, 
+"minbits": 48, 
+"maxbits": 48, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+]
+,[ [{"rate":4}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 4, 
+"blocks": 1024, 
+"minbits": 64, 
+"maxbits": 64, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 16.560500, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.864618e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 4, 
+"blocks": 1024, 
+"minbits": 64, 
+"maxbits": 64, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 16.588900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.858001e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 4, 
+"blocks": 1024, 
+"minbits": 64, 
+"maxbits": 64, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 15.985400, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 4.003653e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 4, 
+"blocks": 1024, 
+"minbits": 64, 
+"maxbits": 64, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 25.059600, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.553911e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 4, 
+"blocks": 1024, 
+"minbits": 64, 
+"maxbits": 64, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 19.882800, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.218863e+08
+}
+]
+]
+,[ [{"rate":6}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 6, 
+"blocks": 1024, 
+"minbits": 96, 
+"maxbits": 96, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 6, 
+"blocks": 1024, 
+"minbits": 96, 
+"maxbits": 96, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 6, 
+"blocks": 1024, 
+"minbits": 96, 
+"maxbits": 96, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 6, 
+"blocks": 1024, 
+"minbits": 96, 
+"maxbits": 96, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 6, 
+"blocks": 1024, 
+"minbits": 96, 
+"maxbits": 96, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 922337203685477.625000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 6.938894e-06
+}
+]
+]
+,[ [{"rate":8}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 8, 
+"blocks": 1024, 
+"minbits": 128, 
+"maxbits": 128, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 18.821300, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.400403e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 8, 
+"blocks": 1024, 
+"minbits": 128, 
+"maxbits": 128, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 19.638700, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.258872e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 8, 
+"blocks": 1024, 
+"minbits": 128, 
+"maxbits": 128, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 16.137700, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.965869e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 8, 
+"blocks": 1024, 
+"minbits": 128, 
+"maxbits": 128, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 33.725600, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.897668e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 8, 
+"blocks": 1024, 
+"minbits": 128, 
+"maxbits": 128, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 24.913100, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.568930e+08
+}
+]
+]
+,[ [{"rate":12}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 12, 
+"blocks": 1024, 
+"minbits": 192, 
+"maxbits": 192, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 21.910200, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.921014e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 12, 
+"blocks": 1024, 
+"minbits": 192, 
+"maxbits": 192, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 23.620100, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.709557e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 12, 
+"blocks": 1024, 
+"minbits": 192, 
+"maxbits": 192, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 19.718800, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 3.245634e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 12, 
+"blocks": 1024, 
+"minbits": 192, 
+"maxbits": 192, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 38.711900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.653238e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 12, 
+"blocks": 1024, 
+"minbits": 192, 
+"maxbits": 192, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 28.613300, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.236722e+08
+}
+]
+]
+,[ [{"rate":16}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 16, 
+"blocks": 1024, 
+"minbits": 256, 
+"maxbits": 256, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 25.020500, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.557903e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 16, 
+"blocks": 1024, 
+"minbits": 256, 
+"maxbits": 256, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 27.616200, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.317480e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 16, 
+"blocks": 1024, 
+"minbits": 256, 
+"maxbits": 256, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 23.803700, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.688658e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 16, 
+"blocks": 1024, 
+"minbits": 256, 
+"maxbits": 256, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 42.999000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.488407e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 16, 
+"blocks": 1024, 
+"minbits": 256, 
+"maxbits": 256, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 32.170900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.989375e+08
+}
+]
+]
+,[ [{"rate":24}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 24, 
+"blocks": 1024, 
+"minbits": 384, 
+"maxbits": 384, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 31.239300, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.048701e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 24, 
+"blocks": 1024, 
+"minbits": 384, 
+"maxbits": 384, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 35.608400, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.797329e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 24, 
+"blocks": 1024, 
+"minbits": 384, 
+"maxbits": 384, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 31.986300, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 2.000857e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 24, 
+"blocks": 1024, 
+"minbits": 384, 
+"maxbits": 384, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 51.099600, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.252456e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 24, 
+"blocks": 1024, 
+"minbits": 384, 
+"maxbits": 384, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 39.271500, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.629681e+08
+}
+]
+]
+,[ [{"rate":32}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 32, 
+"blocks": 1024, 
+"minbits": 512, 
+"maxbits": 512, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 37.458000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.708580e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 32, 
+"blocks": 1024, 
+"minbits": 512, 
+"maxbits": 512, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 43.600600, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.467870e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 32, 
+"blocks": 1024, 
+"minbits": 512, 
+"maxbits": 512, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 40.168000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.593308e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 32, 
+"blocks": 1024, 
+"minbits": 512, 
+"maxbits": 512, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 58.104500, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.101464e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 32, 
+"blocks": 1024, 
+"minbits": 512, 
+"maxbits": 512, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 46.375000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.380054e+08
+}
+]
+]
+,[ [{"rate":40}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 40, 
+"blocks": 1024, 
+"minbits": 640, 
+"maxbits": 640, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 43.677700, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.465279e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 40, 
+"blocks": 1024, 
+"minbits": 640, 
+"maxbits": 640, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 51.592800, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.240483e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 40, 
+"blocks": 1024, 
+"minbits": 640, 
+"maxbits": 640, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 48.212900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.327446e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 40, 
+"blocks": 1024, 
+"minbits": 640, 
+"maxbits": 640, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 63.288100, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.011249e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 40, 
+"blocks": 1024, 
+"minbits": 640, 
+"maxbits": 640, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 53.482400, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.196655e+08
+}
+]
+]
+,[ [{"rate":48}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 48, 
+"blocks": 1024, 
+"minbits": 768, 
+"maxbits": 768, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 49.905300, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.282429e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 48, 
+"blocks": 1024, 
+"minbits": 768, 
+"maxbits": 768, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 59.585000, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.074096e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 48, 
+"blocks": 1024, 
+"minbits": 768, 
+"maxbits": 768, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 55.970700, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.143455e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 48, 
+"blocks": 1024, 
+"minbits": 768, 
+"maxbits": 768, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 67.407200, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 9.494535e+07
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 48, 
+"blocks": 1024, 
+"minbits": 768, 
+"maxbits": 768, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 60.045900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.065851e+08
+}
+]
+]
+,[ [{"rate":56}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 56, 
+"blocks": 1024, 
+"minbits": 896, 
+"maxbits": 896, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 54.798800, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.167909e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 56, 
+"blocks": 1024, 
+"minbits": 896, 
+"maxbits": 896, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 65.759800, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 9.732390e+07
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 56, 
+"blocks": 1024, 
+"minbits": 896, 
+"maxbits": 896, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 63.728500, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.004260e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 56, 
+"blocks": 1024, 
+"minbits": 896, 
+"maxbits": 896, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 69.793900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 9.169856e+07
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 56, 
+"blocks": 1024, 
+"minbits": 896, 
+"maxbits": 896, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 63.081100, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.014567e+08
+}
+]
+]
+,[ [{"rate":64}]
+,[
+{
+"dims": 2, 
+"dataset": "ISABEL",
+"rate": 64, 
+"blocks": 1024, 
+"minbits": 1024, 
+"maxbits": 1024, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 56.882800, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 1.125120e+08
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "NYX",
+"rate": 64, 
+"blocks": 1024, 
+"minbits": 1024, 
+"maxbits": 1024, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 67.896500, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 9.426112e+07
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "QMCPACK",
+"rate": 64, 
+"blocks": 1024, 
+"minbits": 1024, 
+"maxbits": 1024, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 67.164100, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 9.528900e+07
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "S3D",
+"rate": 64, 
+"blocks": 1024, 
+"minbits": 1024, 
+"maxbits": 1024, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 71.797900, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 8.913910e+07
+}
+]
+,[
+{
+"dims": 2, 
+"dataset": "CESM-ATM",
+"rate": 64, 
+"blocks": 1024, 
+"minbits": 1024, 
+"maxbits": 1024, 
+"maxprec": 64, 
+"minexp": -1074
+},
+{
+"Cycles/block": 65.079100, 
+"Bytes/block": 128.000000, 
+"FPGA clockrate": 5.000000e+07, 
+"Throughput": 9.834186e+07
+}
+]
+]
+]

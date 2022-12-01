@@ -61,9 +61,8 @@ typedef zhw::uconfig_t uconfig_t; // unsigned configuration parameter type
 typedef typename fpn_t::expo_t expo_t;	//the exponent part only of floating point representation
 typedef typename fpn_t::si_t si_t;	//an integer representation of the floating point? Not sure what that is
 
-#include "tcasestream.h"	//test bitstreams and floating point numbers (decode only)
 
-#define DEFAULT_BLOCKS 1
+#define DEFAULT_BLOCKS 1024
 #define DEFAULT_RATE (fpn_t::bits)
 #define DEFAULT_TCARG "1"
 
