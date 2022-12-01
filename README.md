@@ -10,18 +10,40 @@ The hardware implementation of ZFP is sourced in SystemC to facilitate its evalu
 - Set your build toolchain to clang-12 or higher
 
 #### Building Using CMake
-- Create an out of source build directory and navigate to it (e.g. `mkdir ../zhw_build && cd ../zhw_build`)
-- Invoke cmake specifying the zhw project directory as a build target, and that unix makefiles should be generated (e.g. `cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../zhw`)
-- Type "make" to build baseline encoder and decoder 2D test programs with .vcd output generation enabled
 
-SystemC will be autodetected provided it was integrated into your CMake cache during install (default behavior).
+System configuration can be delicate, so we provide an example recipe to build ZHW on a clean Ubuntu 20.04 install. To build on other operating systems\, one might adapt the example to account for the idiosyncracies of a particular software stack.
 
-Environment variables:
-
-- LD_LIBRARY_DIR: Must contain a path to the systemc dynamic library
-- PATH: Must contain a path to the install root of the systemc library
-
-A 'make' only build environment is provided but is deprecated. navigate to the testbench directories and type `make help` for information.
+```
+sudo apt install build-essential
+sudo apt install cmake
+sudo apt install clang-12 --install-suggests
+sudo apt install wget
+cd ${HOME}
+wget https://www.accellera.org/images/downloads/standards/systemc/systemc-2.3.3.tar.gz
+mkdir systemc
+mv systemc*tar.gz systemc
+cd systemc
+tar -xvf systemc*tar.gz
+mkdir build
+cd build
+cmake ../systemc-2.3.3 -DCMAKE_INSTALL_PREFIX:PATH=${HOME}/local -DCMAKE_INSTALL_DOCDIR:PATH=${HOME}/local/doc/systemc -DCMAKE_CXX_STANDARD:STRING=11
+make
+make install
+export CC=/usr/bin/clang-12
+export CPP=/usr/bin/clang-cpp-12
+export CXX=/usr/bin/clang++-12
+export LD=/usr/bin/ld.lld-12
+cd ${HOME}
+mkdir zhw_proj
+cd zhw_proj
+git clone https://github.com/LLNL/zhw.git
+mkdir build
+cd build
+export PATH=$PATH:${HOME}/local
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${HOME}/local/lib
+cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../zhw
+make
+```
 
 #### Testing
 
